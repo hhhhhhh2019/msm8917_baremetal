@@ -1,7 +1,7 @@
 include ../Makefile.defaults
 
 BUILD=build
-SRC=src/head.S
+SRC=src/head.S src/main.c
 OBJ=$(patsubst src/%.S,$(BUILD)/%.o,$(patsubst src/%.c,$(BUILD)/%.o,$(SRC)))
 DEP=$(OBJ:.o=.d)
 

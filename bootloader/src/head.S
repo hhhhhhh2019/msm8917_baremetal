@@ -26,5 +26,10 @@ _start:
 
 
 start:
+    ldr x30, =_stack_top
+    mov sp, x30
+
+    bl main
+
     wfe
     b start
