@@ -8,6 +8,7 @@ enum LogLevel {
     LOG_PANIC,
 };
 
+void clear_debug_buffer();
 void log(enum LogLevel, char*);
 void logf(enum LogLevel, char* fmt, ...);
 

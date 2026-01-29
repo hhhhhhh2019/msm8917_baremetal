@@ -60,7 +60,13 @@ void edl_reboot() {
 }
 
 void main() {
+    clear_debug_buffer();
+
     log(LOG_INFO, "hello from main");
+
+    u64 current_el;
+    asm("mrs %0, CurrentEL" : "=r"(current_el));
+    logf(LOG_INFO, "current EL: %z", current_el >> 2);
 
     edl_reboot();
 
