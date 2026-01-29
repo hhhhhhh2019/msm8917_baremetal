@@ -1,0 +1,11 @@
+PREFIX:=aarch64-none-elf-
+AS:=$(PREFIX)gcc
+CC:=$(PREFIX)gcc
+LD:=$(PREFIX)ld
+OBJCOPY:=$(PREFIX)objcopy
+
+MKBOOTIMG:=mkbootimg
+
+AS_FLAGS:=
+CC_FLAGS:=-O2 -ffreestanding
+LD_FLAGS:=-nostdlib
