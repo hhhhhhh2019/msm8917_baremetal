@@ -4,23 +4,6 @@
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
 void edl_reboot() {
-    /* scm_arg.x0 = MAKE_SIP_SCM_CMD(SCM_SVC_IO, SCM_IO_WRITE); */
-    /* scm_arg.x1 = 2; */
-    /* scm_arg.x2 = TCSR_BOOT_MISC_DETECT; */
-    /* scm_arg.x3 = SCM_EDLOAD_MODE; */
-    /* scm_arg.atomic = true; */
-    /* ret = scm_call2(&scm_arg, &scm_ret); */
-
-    /* uint32_t *indir_arg = NULL; */
-    /* uint32_t x5; */
-    /* int i; */
-    /* uint32_t rc; */
-
-    /* arg->x0 |= SCM_ATOMIC_BIT; */
-    /* x5 = 0; */
-
-    /* rc = scm_call_a32(arg->x0, arg->x1, arg->x2, arg->x3, arg->x4, x5, ret); */
-
     register u64 r0 __asm__("x0") = 2181039362;
     register u64 r1 __asm__("x1") = 2;
     register u64 r2 __asm__("x2") = 0x193D100;
@@ -67,7 +50,7 @@ void edl_reboot() {
 }
 
 void main() {
-    writeu32(0x80000000, 0x123456);
+    writeu32(0x90000000, 0xdeadbeef);
 
     edl_reboot();
 
