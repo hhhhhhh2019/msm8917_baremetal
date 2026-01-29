@@ -1,7 +1,7 @@
 include ../Makefile.defaults
 
 BUILD=build
-SRC=src/head.S src/main.c
+SRC=src/head.S src/main.c src/spmi.c
 OBJ=$(patsubst src/%.S,$(BUILD)/%.o,$(patsubst src/%.c,$(BUILD)/%.o,$(SRC)))
 DEP=$(OBJ:.o=.d)
 
@@ -32,7 +32,7 @@ $(BUILD)/bootloader: $(BUILD)/bootloader.elf
 	$(OBJCOPY) -O binary $< $@
 
 $(BUILD)/bootloader.elf: $(OBJ) | $(BUILD)
-	$(LD) $(LD_FLAGS) -T linker.ld $^ -o $@
+	$(LD) $(LD_FLAGS) -T linker.ld -Map=$(BUILD)/bootloader.elf.map $^ -o $@
 
 $(BUILD):
 	@mkdir -p $@

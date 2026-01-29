@@ -11,5 +11,9 @@ SECTIONS {
     __data_end = .;
 
     . = ALIGN(8);
+    . = . + 0x1000;
     _stack_top = .;
+
+    . = . + 4;
+    debug_str = .;
 }
