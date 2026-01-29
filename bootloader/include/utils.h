@@ -3,8 +3,6 @@
 
 #include "stdint.h"
 
-extern char debug_str;
-
 // TODO: find better way to cast int to void*
 #define readi8(a)  (*((i8*)(a)))
 #define readu8(a)  (*((u8*)(a)))

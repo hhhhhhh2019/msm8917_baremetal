@@ -1,4 +1,5 @@
 #include "spmi.h"
+#include "log.h"
 #include "utils.h"
 
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
@@ -31,8 +32,11 @@ void edl_reboot() {
     } while (r0 == 1);
 
 
+    /* log(LOG_INFO, "edl_reboot(): smc done"); */
 
     pmic_reg_write(0, 8, 87, 0);
+
+    /* log(LOG_INFO, "edl_reboot(): PMIC_WD_RESET_S2_CTL2 done"); */
 
     pmic_reg_write(0, 8, 91, 0);
     pmic_reg_write(2, 8, 91, 0);
@@ -46,11 +50,17 @@ void edl_reboot() {
     pmic_reg_write(0, 8, 91, 1 << 7);
     pmic_reg_write(2, 8, 91, 1 << 7);
 
+    /* log(LOG_INFO, "edl_reboot(): pmic_reset_configure done"); */
+
     writeu32(0x004AB000, 0);
+
+    // судя по логам, выполнение доходит даже до сюда
+
+    /* log(LOG_INFO, "edl_reboot(): MPM2_MPM_PS_HOLD done"); */
 }
 
 void main() {
-    writeu32(0x90000000, 0xdeadbeef);
+    log(LOG_INFO, "hello from main");
 
     edl_reboot();
 
