@@ -36,7 +36,7 @@ edl peek 0x90000000 0x2000 dump
 Дерево устройств можно найти либо в интернете, либо по пути `/sys/firmware/fdt` на работающей linux системе(android/postmarketos)
 
 Драйвера для работы с этими устройствами я беру из 3 мест:
- - lk2nd
+ - https://github.com/msm8916-mainline/lk2nd
  - код ядра от xiaomi (https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/riva-n-oss)
  - код ядра от lineageos (https://github.com/LineageOS/android_kernel_xiaomi_msm8937) (да, msm8937)
 
