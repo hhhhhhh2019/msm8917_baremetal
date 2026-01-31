@@ -60,6 +60,9 @@ void edl_reboot() {
 }
 
 #define GCC_BASE 0x1800000
+#define GCC_SLEEP_CLK_OFFSET 0x21000
+#define GCC_SLEEP_CLK_REG 0x45008
+#define GCC_SLEEP_CLK_ENABLE (1 << 23)
 
 #define TLMM_BASE 0x1000000
 #define GPIO_CTL(n) (TLMM_BASE + (n) * 0x1000 + 0)
@@ -93,18 +96,11 @@ void edl_reboot() {
 /* GPIO_IN_OUT register shifts. */
 #define GPIO_IN         BIT(0)
 #define GPIO_OUT        BIT(1)
-
-
-#define CLK_CTL_BASE                       0x1800000
-#define GPLL0_STATUS                       (CLK_CTL_BASE + 0x2101C)
-#define GPLL2_STATUS                       (CLK_CTL_BASE + 0x4A01C)
-#define GPLL0_MODE                         (CLK_CTL_BASE + 0x21000)
-#define APCS_GPLL_ENA_VOTE                 (CLK_CTL_BASE + 0x45000)
-#define APCS_CLOCK_BRANCH_ENA_VOTE         (CLK_CTL_BASE + 0x45004)
-#define GPLL4_MODE                         (CLK_CTL_BASE + 0x24000)
-#define GPLL4_STATUS                       (CLK_CTL_BASE + 0x24024)
-#define GPLL6_STATUS                       (CLK_CTL_BASE + 0x3701C)
 // ------------
+
+u32 gpio_cfg(u8 pull, u8 func, u8 drv, u8 oe) {
+    return (pull << 0) | (func << 2) | (drv << 6) | (oe << 9);
+}
 
 void main() {
     clear_debug_buffer();
@@ -115,14 +111,23 @@ void main() {
     asm("mrs %0, CurrentEL" : "=r"(current_el));
     logf(LOG_INFO, "current EL: %z", current_el >> 2);
 
-    logf(LOG_INFO, "GPLL0_STATUS: %x", readu32(GPLL0_STATUS));
-    logf(LOG_INFO, "GPLL2_STATUS: %x", readu32(GPLL2_STATUS));
-    logf(LOG_INFO, "GPLL0_MODE: %x", readu32(GPLL0_MODE));
-    logf(LOG_INFO, "APCS_GPLL_ENA_VOTE: %x", readu32(APCS_GPLL_ENA_VOTE));
-    logf(LOG_INFO, "APCS_CLOCK_BRANCH_ENA_VOTE: %x", readu32(APCS_CLOCK_BRANCH_ENA_VOTE));
-    logf(LOG_INFO, "GPLL4_MODE: %x", readu32(GPLL4_MODE));
-    logf(LOG_INFO, "GPLL4_STATUS: %x", readu32(GPLL4_STATUS));
-    logf(LOG_INFO, "GPLL6_STATUS: %x", readu32(GPLL6_STATUS));
+    logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
+
+    writeu32(GCC_BASE + GCC_SLEEP_CLK_REG,
+             readu32(GCC_BASE + GCC_SLEEP_CLK_REG) | GCC_SLEEP_CLK_ENABLE);
+
+    logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
+
+    /* writeu32(GPIO_IO(33), 0); */
+
+    /* for (u32 cycle = 0; cycle < 30; cycle++) { */
+    /*     writeu32(GPIO_CTL(33), gpio_cfg(2, 0, GPIO_10MA, 1)); */
+    /*     for (volatile u32 i = 0; i < 100000; i++); */
+    /*     writeu32(GPIO_CTL(33), gpio_cfg(2, 0, GPIO_2MA, 0)); */
+    /*     for (volatile u32 i = 0; i < 100000; i++); */
+    /* } */
+
+    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
     edl_reboot();
 
