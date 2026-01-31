@@ -111,25 +111,19 @@ void main() {
     asm("mrs %0, CurrentEL" : "=r"(current_el));
     logf(LOG_INFO, "current EL: %z", current_el >> 2);
 
-    logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
+    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
-    writeu32(GCC_BASE + GCC_SLEEP_CLK_REG,
-             readu32(GCC_BASE + GCC_SLEEP_CLK_REG) | GCC_SLEEP_CLK_ENABLE);
+    /* writeu32(GCC_BASE + GCC_SLEEP_CLK_REG, */
+    /*          readu32(GCC_BASE + GCC_SLEEP_CLK_REG) | GCC_SLEEP_CLK_ENABLE); */
 
-    logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
+    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
     writeu32(GPIO_CTL(93), gpio_cfg(0, 0, GPIO_2MA, 1));
     writeu32(GPIO_IO(93), 2);
 
-    writeu32(GPIO_CTL(90), gpio_cfg(0, 0, GPIO_2MA, 0));
-    writeu32(GPIO_IO(90), 0);
+    for (volatile u32 i = 0; i < 1000000; i++);
 
-    for (u32 cycle = 0; cycle < 30; cycle++) {
-        for (volatile u32 i = 0; i < 100000; i++);
-        for (volatile u32 i = 0; i < 100000; i++);
-    }
-
-    logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
+    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
     edl_reboot();
 
