@@ -82,10 +82,13 @@ void main() {
     /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
     tlmm_mode(93, GPIO_OUT);
+    tlmm_mode(97, GPIO_OUT);
 
     for (u32 cycle = 0; cycle < 10; cycle++) {
+        tlmm_cfg(97, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
         tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
         for (volatile u32 i = 0; i < 1000000; i++);
+        tlmm_cfg(97, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
         tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
         for (volatile u32 i = 0; i < 1000000; i++);
     }
