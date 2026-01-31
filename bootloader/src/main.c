@@ -74,26 +74,14 @@ void main() {
     asm("mrs %0, CurrentEL" : "=r"(current_el));
     logf(LOG_INFO, "current EL: %z", current_el >> 2);
 
-    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
+    logf(LOG_INFO, "i32 test: %d", -123);
+    logf(LOG_INFO, "u32 test: %z", -123);
+    logf(LOG_INFO, "i64 test: %l", -123l);
+    logf(LOG_INFO, "u64 test: %u", -123l);
+    logf(LOG_INFO, "hex32 test: %x", -123);
+    logf(LOG_INFO, "hex64 test: %X", -123l);
+    logf(LOG_INFO, "str test: %s %s", "hello", "world");
 
-    /* writeu32(GCC_BASE + GCC_SLEEP_CLK_REG, */
-    /*          readu32(GCC_BASE + GCC_SLEEP_CLK_REG) | GCC_SLEEP_CLK_ENABLE); */
-
-    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
-
-    tlmm_mode(93, GPIO_OUT);
-    tlmm_mode(97, GPIO_OUT);
-
-    for (u32 cycle = 0; cycle < 10; cycle++) {
-        tlmm_cfg(97, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
-        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
-        for (volatile u32 i = 0; i < 1000000; i++);
-        tlmm_cfg(97, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
-        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
-        for (volatile u32 i = 0; i < 1000000; i++);
-    }
-
-    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
     edl_reboot();
 

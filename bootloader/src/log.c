@@ -20,7 +20,7 @@ void clear_debug_buffer() {
     }
 }
 
-void log_u32(u32 n) {
+static void log_u32(u32 n) {
     if (n == 0) {
         *(debug_str++) = '0';
         return;
@@ -38,7 +38,71 @@ void log_u32(u32 n) {
     }
 }
 
-void log_hex32(u32 n) {
+static void log_i32(i32 n) {
+    if (n == 0) {
+        *(debug_str++) = '0';
+        return;
+    }
+
+    if (n < 0) {
+        n = -n;
+        *(debug_str++) = '-';
+    }
+
+    u32 r = n;
+    u32 digits = 0;
+    while (r != 0) { digits++; r /= 10; }
+
+    debug_str += digits;
+
+    for (u32 i = 1; i <= digits; i++) {
+        *(debug_str - i) = n % 10 + '0';
+        n /= 10;
+    }
+}
+
+static void log_u64(u64 n) {
+    if (n == 0) {
+        *(debug_str++) = '0';
+        return;
+    }
+
+    u64 r = n;
+    u32 digits = 0;
+    while (r != 0) { digits++; r /= 10; }
+
+    debug_str += digits;
+
+    for (u32 i = 1; i <= digits; i++) {
+        *(debug_str - i) = n % 10 + '0';
+        n /= 10;
+    }
+}
+
+static void log_i64(i64 n) {
+    if (n == 0) {
+        *(debug_str++) = '0';
+        return;
+    }
+
+    if (n < 0) {
+        n = -n;
+        *(debug_str++) = '-';
+    }
+
+    u64 r = n;
+    u32 digits = 0;
+    while (r != 0) { digits++; r /= 10; }
+
+    debug_str += digits;
+
+    for (u32 i = 1; i <= digits; i++) {
+        *(debug_str - i) = n % 10 + '0';
+        n /= 10;
+    }
+}
+
+static void log_hex32(u32 n) {
     if (n == 0) {
         *(debug_str++) = '0';
         return;
@@ -53,6 +117,30 @@ void log_hex32(u32 n) {
     for (u32 i = 1; i <= digits; i++) {
         *(debug_str - i) = hex_chars[n % 16];
         n /= 16;
+    }
+}
+
+static void log_hex64(u64 n) {
+    if (n == 0) {
+        *(debug_str++) = '0';
+        return;
+    }
+
+    u64 r = n;
+    u32 digits = 0;
+    while (r != 0) { digits++; r /= 16; }
+
+    debug_str += digits;
+
+    for (u32 i = 1; i <= digits; i++) {
+        *(debug_str - i) = hex_chars[n % 16];
+        n /= 16;
+    }
+}
+
+static void log_str(char* s) {
+    while (*s) {
+        *(debug_str++) = *(s++);
     }
 }
 
@@ -78,20 +166,26 @@ void logf(enum LogLevel level, char* fmt, ...) {
         fmt++;
 
         switch (*fmt) {
-        /* case 'd': */
-        /*     log_i32(va_arg(args, u32)); */
-        /*     break; */
+        case 'd':
+            log_i32(va_arg(args, i32));
+            break;
         case 'z':
             log_u32(va_arg(args, u32));
             break;
-        /* case 'l': */
-        /*     log_i64(va_arg(args, u32)); */
-        /*     break; */
-        /* case 'u': */
-        /*     log_u64(va_arg(args, u32)); */
-        /*     break; */
+        case 'l':
+            log_i64(va_arg(args, i64));
+            break;
+        case 'u':
+            log_u64(va_arg(args, u64));
+            break;
         case 'x':
             log_hex32(va_arg(args, u32));
+            break;
+        case 'X':
+            log_hex64(va_arg(args, u64));
+            break;
+        case 's':
+            log_str(va_arg(args, char*));
             break;
         }
     }
