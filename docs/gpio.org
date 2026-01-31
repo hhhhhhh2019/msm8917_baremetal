@@ -4,6 +4,16 @@
 
 Судя по dts у spmi-mpp и spmi-gpio нет ничего интересного(хотя в исходниках lk2nd дисплей управляется через spmi, но не факт, что я смотрел код для моего устройства)
 
+(светодиод снизу подключен через i2c)
+
+
+из документации линукса:
+
+LOW: gpio_direction_output(gpio, 0) ... this drives the signal jand overrides the pullup.
+
+HIGH: gpio_direction_input(gpio) ... this turns off the output, so the pullup (or some other device) controls the signal.
+
+
 * Всякие константы
 | имя                    |  значение | комментарии            |
 |------------------------+-----------+------------------------|

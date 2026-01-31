@@ -118,16 +118,18 @@ void main() {
 
     logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
 
-    /* writeu32(GPIO_IO(33), 0); */
+    writeu32(GPIO_CTL(93), gpio_cfg(0, 0, GPIO_2MA, 1));
+    writeu32(GPIO_IO(93), 2);
 
-    /* for (u32 cycle = 0; cycle < 30; cycle++) { */
-    /*     writeu32(GPIO_CTL(33), gpio_cfg(2, 0, GPIO_10MA, 1)); */
-    /*     for (volatile u32 i = 0; i < 100000; i++); */
-    /*     writeu32(GPIO_CTL(33), gpio_cfg(2, 0, GPIO_2MA, 0)); */
-    /*     for (volatile u32 i = 0; i < 100000; i++); */
-    /* } */
+    writeu32(GPIO_CTL(90), gpio_cfg(0, 0, GPIO_2MA, 0));
+    writeu32(GPIO_IO(90), 0);
 
-    /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
+    for (u32 cycle = 0; cycle < 30; cycle++) {
+        for (volatile u32 i = 0; i < 100000; i++);
+        for (volatile u32 i = 0; i < 100000; i++);
+    }
+
+    logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG));
 
     edl_reboot();
 
