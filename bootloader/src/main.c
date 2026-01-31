@@ -1,6 +1,7 @@
 #include "spmi.h"
 #include "log.h"
 #include "utils.h"
+#include "gpio.h"
 
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
@@ -64,44 +65,6 @@ void edl_reboot() {
 #define GCC_SLEEP_CLK_REG 0x45008
 #define GCC_SLEEP_CLK_ENABLE (1 << 23)
 
-#define TLMM_BASE 0x1000000
-#define GPIO_CTL(n) (TLMM_BASE + (n) * 0x1000 + 0)
-#define GPIO_IO(n) (TLMM_BASE + (n) * 0x1000 + 4)
-
-// lk2nd
-/* GPIO TLMM: Direction */
-#define GPIO_INPUT      0
-#define GPIO_OUTPUT     1
-
-/* GPIO TLMM: Pullup/Pulldown */
-#define GPIO_NO_PULL    0
-#define GPIO_PULL_DOWN  1
-#define GPIO_KEEPER     2
-#define GPIO_PULL_UP    3
-
-/* GPIO TLMM: Drive Strength */
-#define GPIO_2MA        0
-#define GPIO_4MA        1
-#define GPIO_6MA        2
-#define GPIO_8MA        3
-#define GPIO_10MA       4
-#define GPIO_12MA       5
-#define GPIO_14MA       6
-#define GPIO_16MA       7
-
-/* GPIO TLMM: Status */
-#define GPIO_ENABLE     0
-#define GPIO_DISABLE    1
-
-/* GPIO_IN_OUT register shifts. */
-#define GPIO_IN         BIT(0)
-#define GPIO_OUT        BIT(1)
-// ------------
-
-u32 gpio_cfg(u8 pull, u8 func, u8 drv, u8 oe) {
-    return (pull << 0) | (func << 2) | (drv << 6) | (oe << 9);
-}
-
 void main() {
     clear_debug_buffer();
 
@@ -118,10 +81,14 @@ void main() {
 
     /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
-    writeu32(GPIO_CTL(93), gpio_cfg(0, 0, GPIO_2MA, 1));
-    writeu32(GPIO_IO(93), 2);
+    tlmm_mode(93, GPIO_OUT);
 
-    for (volatile u32 i = 0; i < 1000000; i++);
+    for (u32 cycle = 0; cycle < 10; cycle++) {
+        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
+        for (volatile u32 i = 0; i < 1000000; i++);
+        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
+        for (volatile u32 i = 0; i < 1000000; i++);
+    }
 
     /* logf(LOG_INFO, "sleep clk: %x", readu32(GCC_BASE + GCC_SLEEP_CLK_REG)); */
 
