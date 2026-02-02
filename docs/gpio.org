@@ -39,3 +39,18 @@ HIGH: gpio_direction_input(gpio) ... this turns off the output, so the pullup (o
 | intr_target_kpss_val   |         4 |                        |
 | intr_raw_status_bit    |         4 |                        |
 | intr_target_bit        |         5 |                        |
+
+* Устройства
+** Flashlight
+gpio90 - flash_now, gpio93 - flash_en
+
+чтобы включить фонарик: gpio93 = output mode, 2ma, no pull, func0, enable
+выключить соответственно disable
+
+gpio90 нужен для вспышки, но я его не трогал
+
+** Вибратор
+gpio97
+
+просто ставите out, no pull, 2ma, func0, enable
+выключаете через disable
