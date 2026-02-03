@@ -1,0 +1,95 @@
+gcdb_display_init()
+    oem_panel_select(panel_name, &panelstruct, &(panel.panel_info), &dsi_video_mode_phy_db);
+        panel_override_id = panel_name_to_id(supp_panels, ARRAY_SIZE(supp_panels), panel_name);
+        panel_id = TRULY_720P_VIDEO_PANEL, возможно HX8394F_720P_VIDEO_PANEL;
+
+    pdate_dsi_display_config()
+        panelstruct.paneldata->panel_operating_mode = какой-то выбор DUAL_PIPE_FLAG, DST_SPLIT_FLAG
+
+    target_dsi_phy_config(&dsi_video_mode_phy_db)
+        memcpy(phy_db->regulator, panel_regulator_settings, REGULATOR_SIZE);
+        memcpy(phy_db->ctrl, panel_physical_ctrl, PHYSICAL_SIZE);
+        memcpy(phy_db->strength, panel_strength_ctrl, STRENGTH_SIZE);
+        memcpy(phy_db->bistCtrl, panel_bist_ctrl, BIST_SIZE);
+        memcpy(phy_db->laneCfg, panel_lane_config, LANE_SIZE);
+
+    mdss_dsi_check_swap_status();
+        struct oem_panel_data *oem_data = mdss_dsi_get_oem_data_ptr();
+        panelstruct.paneldata->panel_destination = panel_dest;
+        panelstruct.paneldata->panel_controller = dsi_controller;
+
+    mdss_dsi_set_pll_src();
+        struct oem_panel_data *oem_data = mdss_dsi_get_oem_data_ptr();
+
+        if (!is_dsi_config_dual() && (panelstruct.paneldata->panel_operating_mode & USE_DSI1_PLL_FLAG))
+            oem_data->dsi_pll_src = DSI_PLL1;
+
+        if (is_dsi_config_dual()) {
+            if (oem_data->dsi_pll_src != DSI_PLL_DEFAULT) {
+                dprintf(CRITICAL, "Dual DSI config detected!" "Use default PLL\n");
+                oem_data->dsi_pll_src = DSI_PLL_DEFAULT;
+            }
+        } else if (is_dsi_config_split()) {
+            if((dsi_video_mode_phy_db.pll_type != DSI_PLL_TYPE_THULIUM) && (oem_data->dsi_pll_src == DSI_PLL1)) {
+                dprintf(CRITICAL, "Split DSI on 28nm/20nm!"  "Use DSI PLL0\n");
+                oem_data->dsi_pll_src = DSI_PLL0;
+            }
+        } else {
+            if ((dsi_video_mode_phy_db.pll_type != DSI_PLL_TYPE_THULIUM) && !strcmp(panelstruct.paneldata->panel_destination, "DISPLAY_1") && (oem_data->dsi_pll_src == DSI_PLL1)) {
+                dprintf(CRITICAL, "Single DSI with DSI-0 on 28nm/20nm!" "Use DSI PLL0\n");
+                oem_data->dsi_pll_src = DSI_PLL0;
+            }
+        }
+
+        if (oem_data->dsi_pll_src == DSI_PLL1)
+            panelstruct.paneldata->panel_operating_mode |= USE_DSI1_PLL_FLAG;
+        else if (oem_data->dsi_pll_src == DSI_PLL0)
+            panelstruct.paneldata->panel_operating_mode &= ~USE_DSI1_PLL_FLAG;
+
+    dsi_panel_init(&(panel.panel_info), &panelstruct);
+        //  настройка разлчных параметров panel.panel_info, типа размеров
+        pinfo->pre_on = dsi_panel_pre_on;
+        pinfo->pre_off = dsi_panel_pre_off;
+        pinfo->on = dsi_panel_post_on;
+        pinfo->off = dsi_panel_post_off;
+        pinfo->rotate = dsi_panel_rotation;
+        pinfo->config = dsi_panel_config;
+
+    panel.panel_info.mipi.mdss_dsi_phy_db = &dsi_video_mode_phy_db;
+    panel.pll_clk_func = mdss_dsi_panel_clock;
+    panel.dfps_func = mdss_dsi_mipi_dfps_config;
+    panel.power_func = mdss_dsi_panel_power;
+    panel.pre_init_func = mdss_dsi_panel_pre_init;
+    panel.bl_func = mdss_dsi_bl_enable;
+    panel.dsi2HDMI_config = mdss_dsi2HDMI_config;
+    /*
+        * Reserve fb memory to store pll codes and pass
+        * pll codes values to kernel.
+        */
+    panel.panel_info.dfps.dfps_fb_base = base;
+    base += DFPS_PLL_CODES_SIZE;
+    panel.fb.base = base;
+    panel.fb.width =  panel.panel_info.xres;
+    panel.fb.height =  panel.panel_info.yres;
+    panel.fb.stride =  panel.panel_info.xres;
+    panel.fb.bpp =  panel.panel_info.bpp;
+    panel.fb.format = panel.panel_info.mipi.dst_format;
+
+    panel.fb.base = base;
+    panel.mdp_rev = rev;
+
+    msm_display_init(&panel);
+        pdata->power_func(1, &(panel->panel_info)); = mdss_dsi_panel_power
+        pdata->dfps_func(&(panel->panel_info));
+        pdata->clk_func(1, &(panel->panel_info));
+        pdata->update_panel_info();
+        pdata->pll_clk_func(1, &(panel->panel_info));
+        pdata->panel_info.prepare();
+        msm_fb_alloc(&(panel->fb));
+        fbcon_setup(&(panel->fb));
+        display_image_on_screen();
+        panel->dsi2HDMI_config(&(panel->panel_info);
+        msm_display_config();
+        msm_display_on();
+        pdata->post_power_func(1);
+        pdata->bl_func(1);
