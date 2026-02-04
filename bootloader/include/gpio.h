@@ -39,13 +39,8 @@ enum GPIOStatus {
     GPIO_DISABLE = 1,
 };
 
-enum GPIOInOut {
-    GPIO_IN  = 1,
-    GPIO_OUT = 2
-};
-
 void tlmm_cfg(u16 port, enum GPIOPull pull, enum GPIOFunc func,
               enum GPIODStr drv, enum GPIOStatus oe);
-void tlmm_mode(u16 port, enum GPIOInOut mode);
+void tlmm_mode(u16 port, enum GPIODir mode);
 
 #endif // GPIO_H_
