@@ -1,224 +1,47 @@
-вообще ничего не понял. файл target/msm8952/target_display.c, в котором лежат почти все эти функции не используется.
-при компиляции используется файл target/target_display.c, в котором лежит только каркас, а сами реализации этих функций пусты.
-как тогда работает дисплей совершенно не ясно.
-
-оставля пока этот файл, вдруг пригодтся
-
 на моем телефоне hx8394f
 
-target_display_init(const char *panel_name)
-	struct oem_panel_data oem = mdss_dsi_get_oem_data();
-	set_panel_cmd_strig(panel_name);
+lk2nd/display/cont-splash/target_display.c: target_display_init(const char *panel_name)
+	mdp_setup_cont_splash()
+		static struct fbcon_config fb;
+		mdp_read_config(&fb); = mdp_read_pipe_config(fb)
+			pipe = mdp_find_pipe(fb);
+				const struct mdp_pipe *pipe = mdp_pipes;
+				const struct mdp_pipe *pipe_end = pipe + ARRAY_SIZE(mdp_pipes);
 
-	(вообще это обёрнуто в while, но будет считать, что тут один цикл)
-	target_force_cont_splash_disable(false);
-	gcdb_display_init(oem.panel, MDP_REV_50, (void *)MIPI_FB_ADDR)
-	    oem_panel_select(panel_name, &panelstruct, &(panel.panel_info), &dsi_video_mode_phy_db);
-		panel_override_id = panel_name_to_id(supp_panels, ARRAY_SIZE(supp_panels), panel_name);
-		panel_id = TRULY_720P_VIDEO_PANEL, возможно HX8394F_720P_VIDEO_PANEL;
-		memcpy(panel_regulator_settings, dcdc_regulator_settings_lpm, REGULATOR_SIZE);
-		pinfo->pipe_type = MDSS_MDP_PIPE_TYPE_RGB;
-		init_panel_data(panelstruct, pinfo, phy_db);
-			struct oem_panel_data *oem_data = mdss_dsi_get_oem_data_ptr();
-			panelstruct->paneldata	  = &hx8394f_720p_video_panel_data;
-			panelstruct->panelres	  = &hx8394f_720p_video_panel_res;
-			panelstruct->color        = &hx8394f_720p_video_color;
-			panelstruct->videopanel   = &hx8394f_720p_video_video_panel;
-			panelstruct->commandpanel = &hx8394f_720p_video_command_panel;
-			panelstruct->state        = &hx8394f_720p_video_state;
-			panelstruct->laneconfig   = &hx8394f_720p_video_lane_config;
-			panelstruct->paneltiminginfo = &hx8394f_720p_video_timing_info;
-			panelstruct->panelresetseq = &hx8394f_720p_video_reset_seq;
-			panelstruct->backlightinfo = &hx8394f_720p_video_backlight;
-			pinfo->mipi.panel_on_cmds = hx8394f_720p_video_on_command;
-			pinfo->mipi.num_of_panel_on_cmds = HX8394F_720P_VIDEO_ON_COMMAND;
-			pinfo->mipi.panel_off_cmds = hx8394f_720p_video_off_command;
-			pinfo->mipi.num_of_panel_off_cmds = HX8394F_720P_VIDEO_OFF_COMMAND;
-			memcpy(phy_db->timing, hx8394f_720p_video_timings, TIMING_SIZE);
-			pinfo->mipi.signature = HX8394F_720P_VIDEO_SIGNATURE;
+				for (; pipe < pipe_end; pipe++) {
+					fb->base = (void *)readl(pipe->base + PIPE_SRC0_ADDR);
+					if (fb->base)
+						return pipe;
+				}
+			src_size = readl(pipe->base + PIPE_SRC_SIZE);
+			img_size = readl(pipe->base + PIPE_SRC_IMG_SIZE);
+			src_xy = readl(pipe->base + PIPE_SRC_XY);
+			out_size = readl(pipe->base + PIPE_SRC_OUT_SIZE);
+			out_xy = readl(pipe->base + PIPE_OUT_XY);
+			stride = readl(pipe->base + PIPE_SRC_YSTRIDE);
+			format = readl(pipe->base + PIPE_SRC_FORMAT);
+			bpp = BITS_SHIFT(format, 10, 9) + 1; /* SRC_BPP */
+			fb->width = MDP_X(img_size);
+			fb->height = MDP_Y(img_size);
+			fb->stride = stride / bpp;
+			fb->bpp = bpp * 8;
+		mdp_prepare_fb(&fb)
+			uint32_t size = fb->stride * fb->bpp/8 * fb->height;
+			uintptr_t base = (uintptr_t)fb->base;
+			lk2nd_mmu_map_ram_dynamic("continuous splash", base, size);
+		mdp_setup_refresh(&fb)
+			sel = readl(MDP_CTL_0_BASE + CTL_TOP);
+			cmd_mode = !!(sel & BIT(17));
+			if (cmd_mode && !auto_refresh) mdp_setup_cmd_refresh(fb);
+				fb->update_start = mdp_refresh; = writel(1, MDP_CTL_0_BASE + CTL_START);
 
+		fbcon_setup(&fb); // как будто бы ничего интерестного
 
-	    pdate_dsi_display_config()
-		panelstruct.paneldata->panel_operating_mode = какой-то выбор DUAL_PIPE_FLAG, DST_SPLIT_FLAG
+	display_image_on_screen();
+		fbcon_puts_ln(WHITE, y, incr, true, xstr(BOARD));
+		fbcon_flush();
+			if (config->update_start)
+				config->update_start();
+			if (config->update_done)
+				while (!config->update_done());
 
-	    target_dsi_phy_config(&dsi_video_mode_phy_db)
-		memcpy(phy_db->regulator, panel_regulator_settings, REGULATOR_SIZE);
-		memcpy(phy_db->ctrl, panel_physical_ctrl, PHYSICAL_SIZE);
-		memcpy(phy_db->strength, panel_strength_ctrl, STRENGTH_SIZE);
-		memcpy(phy_db->bistCtrl, panel_bist_ctrl, BIST_SIZE);
-		memcpy(phy_db->laneCfg, panel_lane_config, LANE_SIZE);
-
-	    mdss_dsi_check_swap_status();
-		struct oem_panel_data *oem_data = mdss_dsi_get_oem_data_ptr();
-		panelstruct.paneldata->panel_destination = panel_dest;
-		panelstruct.paneldata->panel_controller = dsi_controller;
-
-	    mdss_dsi_set_pll_src();
-		struct oem_panel_data *oem_data = mdss_dsi_get_oem_data_ptr();
-
-		if (!is_dsi_config_dual() && (panelstruct.paneldata->panel_operating_mode & USE_DSI1_PLL_FLAG))
-		    oem_data->dsi_pll_src = DSI_PLL1;
-
-		if (is_dsi_config_dual()) {
-		    if (oem_data->dsi_pll_src != DSI_PLL_DEFAULT) {
-		        dprintf(CRITICAL, "Dual DSI config detected!" "Use default PLL\n");
-		        oem_data->dsi_pll_src = DSI_PLL_DEFAULT;
-		    }
-		} else if (is_dsi_config_split()) {
-		    if((dsi_video_mode_phy_db.pll_type != DSI_PLL_TYPE_THULIUM) && (oem_data->dsi_pll_src == DSI_PLL1)) {
-		        dprintf(CRITICAL, "Split DSI on 28nm/20nm!"  "Use DSI PLL0\n");
-		        oem_data->dsi_pll_src = DSI_PLL0;
-		    }
-		} else {
-		    if ((dsi_video_mode_phy_db.pll_type != DSI_PLL_TYPE_THULIUM) && !strcmp(panelstruct.paneldata->panel_destination, "DISPLAY_1") && (oem_data->dsi_pll_src == DSI_PLL1)) {
-		        dprintf(CRITICAL, "Single DSI with DSI-0 on 28nm/20nm!" "Use DSI PLL0\n");
-		        oem_data->dsi_pll_src = DSI_PLL0;
-		    }
-		}
-
-		if (oem_data->dsi_pll_src == DSI_PLL1)
-		    panelstruct.paneldata->panel_operating_mode |= USE_DSI1_PLL_FLAG;
-		else if (oem_data->dsi_pll_src == DSI_PLL0)
-		    panelstruct.paneldata->panel_operating_mode &= ~USE_DSI1_PLL_FLAG;
-
-	    dsi_panel_init(&(panel.panel_info), &panelstruct);
-		//  настройка разлчных параметров panel.panel_info, типа размеров
-		pinfo->pre_on = dsi_panel_pre_on;
-		pinfo->pre_off = dsi_panel_pre_off;
-		pinfo->on = dsi_panel_post_on;
-		pinfo->off = dsi_panel_post_off;
-		pinfo->rotate = dsi_panel_rotation;
-		pinfo->config = dsi_panel_config;
-
-	    panel.panel_info.mipi.mdss_dsi_phy_db = &dsi_video_mode_phy_db;
-	    panel.pll_clk_func = mdss_dsi_panel_clock;
-	    panel.dfps_func = mdss_dsi_mipi_dfps_config;
-	    panel.power_func = mdss_dsi_panel_power;
-	    panel.pre_init_func = mdss_dsi_panel_pre_init;
-	    panel.bl_func = mdss_dsi_bl_enable;
-	    panel.dsi2HDMI_config = mdss_dsi2HDMI_config;
-	    /*
-		* Reserve fb memory to store pll codes and pass
-		* pll codes values to kernel.
-		*/
-	    panel.panel_info.dfps.dfps_fb_base = base;
-	    base += DFPS_PLL_CODES_SIZE;
-	    panel.fb.base = base;
-	    panel.fb.width =  panel.panel_info.xres;
-	    panel.fb.height =  panel.panel_info.yres;
-	    panel.fb.stride =  panel.panel_info.xres;
-	    panel.fb.bpp =  panel.panel_info.bpp;
-	    panel.fb.format = panel.panel_info.mipi.dst_format;
-
-	    panel.fb.base = base;
-	    panel.mdp_rev = rev;
-
-	    msm_display_init(&panel);
-		pdata->power_func(1, &(panel->panel_info)); = mdss_dsi_panel_power = target_ldo_ctrl(enable, pinfo);
-			ldo_num = REG_LDO6 | REG_LDO17 | REG_LDO2;
-			regulator_enable(ldo_num);
-				rpm_send_data(&ldo2[GENERIC_ENABLE][0], 36, RPM_REQUEST_TYPE); = rpm_smd_send_data(data, len, type);
-					req.hdr.type = RPM_REQ_MAGIC;
-					req.hdr.len = len + REQ_MSG_LENGTH;//20
-					req.req_hdr.id = ++msg_id;
-					req.req_hdr.set = 0;//assume active set. check sleep set.
-					req.req_hdr.resourceType = data[RESOURCETYPE];
-					req.req_hdr.resourceId = data[RESOURCEID];
-					req.req_hdr.dataLength = len;
-
-					fill_kvp_object(&req.data, data, len);
-					len_to_smd = req.req_hdr.dataLength + 0x28;
-
-					smd_data = (void*) malloc(len_to_smd);
-					ASSERT(smd_data);
-
-					memcpy(smd_data, &req.hdr, sizeof(rpm_gen_hdr));
-					memcpy(smd_data + sizeof(rpm_gen_hdr), &req.req_hdr, sizeof(rpm_req_hdr));
-					memcpy(smd_data + sizeof(rpm_gen_hdr)+ sizeof(rpm_req_hdr), req.data, len);
-
-					ret = smd_write(&ch, smd_data, len_to_smd, SMD_APPS_RPM);
-						ch->port_info->ch0.DTR_DSR = 0;
-						ch->port_info->ch0.CTS_RTS = 0;
-						ch->port_info->ch0.CD = 0;
-						ch->port_info->ch0.stream_state = state;
-
-					/* Read the response */
-					ack_msg_len = rpm_smd_recv_data(&rlen);
-						rpm_ack_msg *resp;
-						uint32_t ret = 0;
-						uint32_t response[5];
-						smd_read(&ch, len, SMD_APPS_RPM, response);
-							ch->port_info = smem_get_alloc_entry(SMEM_SMD_BASE_ID + ch->alloc_entry.cid, &size);
-							цикл, хз как он прерывается
-								arch_invalidate_cache_range((addr_t) ch->port_info, ROUNDUP(size, CACHE_LINE));
-							memcpy_from_fifo(ch, (uint32_t *)&smd_hdr, sizeof(smd_hdr));
-							*len = smd_hdr.pkt_size;
-							цикл, хз как он прерывается
-								arch_invalidate_cache_range((addr_t) ch->port_info, ROUNDUP(size, CACHE_LINE));
-							memcpy_from_fifo(ch, response, smd_hdr.pkt_size);
-
-					smd_signal_read_complete(&ch, ack_msg_len);
-						ch->port_info->ch1.data_written = 0;
-						ch->port_info->ch0.data_read = 1;
-						ch->port_info->ch0.mask_recv_intr = 1;
-						dsb(); = "mcr p15, 0, %0, c7, c10, 4" : : "r" (0): "memory"
-						smd_notify_rpm(); = writel(BIT(0), APCS_ALIAS0_IPC_INTERRUPT);
-
-					free(smd_data);
-					free_kvp_object(&req.data);
-				rpm_send_data(&ldo17[GENERIC_ENABLE][0], 36, RPM_REQUEST_TYPE); = rpm_smd_send_data(data, len, type);
-				rpm_send_data(&ldo6[GENERIC_ENABLE][0], 36, RPM_REQUEST_TYPE); = rpm_smd_send_data(data, len, type);
-			mdelay(10);
-			if(!pinfo->disable_wled_labibb)
-				wled_init(pinfo);
-				qpnp_ibb_enable(true);
-				mdelay(50);
-		pdata->dfps_func(&(panel->panel_info)); = mdss_dsi_mipi_dfps_config
-		//pdata->clk_func(1, &(panel->panel_info));
-		//pdata->update_panel_info();
-		pdata->pll_clk_func(1, &(panel->panel_info)); = mdss_dsi_panel_clock
-		//pdata->panel_info.prepare();
-		msm_fb_alloc(&(panel->fb)); = fb->base = memalign(4096, fb->width * fb->height (fb->bpp / 8));
-		fbcon_setup(&(panel->fb)); = fb_color_formats = fb_color_formats_555 или fb_color_formats_888; fbcon_set_colors(FBCON_COMMON_MSG);
-		# не интересует display_image_on_screen();
-		# не делает ничего panel->dsi2HDMI_config(&(panel->panel_info);
-		msm_display_config();
-			mdp_set_revision(panel->mdp_rev);
-		msm_display_on();
-		pdata->post_power_func(1);
-		pdata->bl_func(1);
-		
-		
-int rpm_send_data(uint32_t *data, uint32_t len, msg_type type)
-{
-	int ret = 0;
-
-	/* Runtime select to call glink or smd */
-	if (platform_is_glink_enabled()) // == 0
-		ret = rpm_glink_send_data(data, len, type);
-	else
-		ret = rpm_smd_send_data(data, len, type);
-
-	return ret;
-}
-
-void memcpy_from_fifo(smd_channel_info_t *ch_ptr, uint32_t *dest, size_t len)
-{
-	uint32_t read_index = ch_ptr->port_info->ch1.read_index;
-	uint32_t *src = (uint32_t *)(ch_ptr->recv_buf + read_index);
-
-	while(len)
-	{
-		*dest++ = readl(src++);
-		read_index += 4;
-		len -= 4;
-
-		if (read_index >= ch_ptr->fifo_size)
-		{
-			read_index = 0;
-			src = (uint32_t *) (ch_ptr->recv_buf + read_index);
-		}
-	}
-
-	ch_ptr->port_info->ch1.read_index = read_index;
-}
