@@ -147,17 +147,20 @@ void main() {
     logf(LOG_INFO, "width: %d", width);
     logf(LOG_INFO, "height: %d", height);
 
-    u32* base = (u32*)(u64)readu32(MDP_VP_0_RGB_0_BASE + PIPE_SRC0_ADDR);
+    u8* base = (u8*)(u64)readu32(MDP_VP_0_RGB_0_BASE + PIPE_SRC0_ADDR);
 
-    for (u32 x = 100; x < 200; x++) {
-        for (u32 y = 100; y < 200; y++) {
-            *(base + x + y * (2160 / 4)) = 0xffffffff;
+    for (u32 x = 0; x < 720; x++) {
+        for (u32 y = 0; y < 1280; y++) {
+          u32 offset = (x + y * 720) * 3;
+          *(base + offset + 2) = x * 255 / 720;
+          *(base + offset + 1) = y * 255 / 1280;
+          *(base + offset + 0) = 0x0;
         }
     }
 
     writeu32(MDP_CTL_0_BASE + CTL_START, 1);
 
-    for (volatile u32 i = 0; i < 30000000; i++);
+    for (volatile u32 i = 0; i < 1000000; i++);
 
     edl_reboot();
 
