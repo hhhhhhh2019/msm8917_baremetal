@@ -22,4 +22,6 @@
 #define writei64(a, v) (*((i64*)(a)) = (v))
 #define writeu64(a, v) (*((u64*)(a)) = (v))
 
+#define bits(n, e, s) (((n) >> (s)) & (1 << ((e) - (s) + 1)) - 1)
+
 #endif // UTILS_H_

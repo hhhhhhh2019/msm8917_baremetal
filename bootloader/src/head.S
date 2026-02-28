@@ -24,6 +24,9 @@ _start:
     // reserved
     .word 0
 
+interrupts_enable:
+
+    ret
 
 start:
     ldr x30, =_stack_top

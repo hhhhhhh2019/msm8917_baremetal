@@ -1,0 +1,48 @@
+platform/msm_shared/qgic_common.c:
+qgic_init()
+    qgic_dist_init()
+        writel(0, GIC_DIST_CTRL);
+        cpumask = qgic_get_cpumask();
+            for (i=0; i < 32; i += 4) {
+                mask = readl(GIC_DIST_TARGET + i);
+                mask |= mask >> 16;
+                mask |= mask >> 8;
+                if (mask)
+                    break;
+            }
+
+        cpumask |= cpumask << 8;
+        cpumask |= cpumask << 16;
+        num_irq = readl(GIC_DIST_CTR) & 0x1f;
+        num_irq = (num_irq + 1) * 32;
+        for (i = 32; i < num_irq; i += 4)
+            writel(cpumask, GIC_DIST_TARGET + i * 4 / 4);
+        qgic_dist_config(num_irq);
+            /* Set each interrupt line to use N-N software model
+            * and edge sensitive, active high
+            */
+            for (i = 32; i < num_irq; i += 16)
+                writel(0xffffffff, GIC_DIST_CONFIG + i * 4 / 16);
+
+            writel(0xffffffff, GIC_DIST_CONFIG + 4);
+
+            /* Set priority of all interrupts */
+
+            /*
+            * In bootloader we dont care about priority so
+            * setting up equal priorities for all
+            */
+            for (i = 0; i < num_irq; i += 4)
+                writel(0xa0a0a0a0, GIC_DIST_PRI + i * 4 / 4);
+
+            /* Disabling interrupts */
+            for (i = 0; i < num_irq; i += 32)
+                writel(0xffffffff, GIC_DIST_ENABLE_CLEAR + i * 4 / 32);
+
+            writel(0x0000ffff, GIC_DIST_ENABLE_SET);
+
+        writel(1, GIC_DIST_CTRL);
+
+    qgic_cpu_init()
+        writel(0xf0, GIC_CPU_PRIMASK);
+        writel(1, GIC_CPU_CTRL);

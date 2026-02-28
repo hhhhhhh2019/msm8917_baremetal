@@ -1,0 +1,25 @@
+platform/msm8952/msm8952-clock.c:
+static struct pll_vote_clk gpll0_clk_src =
+{
+	.en_reg       = (void *) APCS_GPLL_ENA_VOTE,
+	.en_mask      = BIT(0),
+	.status_reg   = (void *) GPLL0_STATUS,
+	.status_mask  = BIT(17),
+	.parent       = &cxo_clk_src.c,
+
+	.c = {
+		.rate     = 800000000,
+		.dbg_name = "gpll0_clk_src",
+		.ops      = &clk_ops_pll_vote,
+	},
+};
+
+platform/msm_shared/clock.c:
+static struct clk_list msm_clk_list;
+
+platform/msm8952/msm8952-clock.c:
+platform_clock_init()
+    gpll0_clk_src.status_reg = (void *)GPLL0_MODE;
+    gpll0_clk_src.status_mask = BIT(30);
+    msm_clk_list.clist = (struct clk_lookup *)msm_clocks_8952;
+    msm_clk_list.num = ARRAY_SIZE(msm_clocks_8952);
