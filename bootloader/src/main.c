@@ -6,6 +6,30 @@
 
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
+#define QTIMER_FREQ 0x124f800
+
+#define APPS_APCS_F0_QTMR_V1_BASE          0xb021000
+#define QTMR_BASE                          APPS_APCS_F0_QTMR_V1_BASE
+
+#define QTMR_V1_CNTPCT_LO                (0x00000000 + QTMR_BASE)
+#define QTMR_V1_CNTPCT_HI                (0x00000004 + QTMR_BASE)
+#define QTMR_V1_CNTFRQ                   (0x00000010 + QTMR_BASE)
+#define QTMR_V1_CNTP_CVAL_LO             (0x00000020 + QTMR_BASE)
+#define QTMR_V1_CNTP_CVAL_HI             (0x00000024 + QTMR_BASE)
+#define QTMR_V1_CNTP_TVAL                (0x00000028 + QTMR_BASE)
+#define QTMR_V1_CNTP_CTL                 (0x0000002C + QTMR_BASE)
+
+#define QTMR_TIMER_CTRL_ENABLE          (1 << 0)
+#define QTMR_TIMER_CTRL_INT_MASK        (1 << 1)
+
+#define GIC_PPI_START                          16
+#define GIC_SPI_START                          32
+
+#define INT_QTMR_NON_SECURE_PHY_TIMER_EXP      (GIC_PPI_START + 3)
+#define INT_QTMR_VIRTUAL_TIMER_EXP             (GIC_PPI_START + 4)
+
+#define INT_QTMR_FRM_0_PHYSICAL_TIMER_EXP      (GIC_SPI_START + 257)
+
 void edl_reboot() {
     register u64 r0 __asm__("x0") = 2181039362;
     register u64 r1 __asm__("x1") = 2;
@@ -61,110 +85,160 @@ void edl_reboot() {
     /* log(LOG_INFO, "edl_reboot(): MPM2_MPM_PS_HOLD done"); */
 }
 
-#define APPS_SS_BASE                       0x0B000000
-#define APPS_SS_END                        0x0B200000
+void set_vbar(u64 addr);
+u64 get_vbar();
 
-#define MSM_GIC_DIST_BASE                  APPS_SS_BASE
-#define MSM_GIC_CPU_BASE                   (APPS_SS_BASE + 0x2000)
-#define APPS_APCS_QTMR_AC_BASE             (APPS_SS_BASE + 0x00020000)
-#define APPS_APCS_F0_QTMR_V1_BASE          (APPS_SS_BASE + 0x00021000)
-#define QTMR_BASE                          APPS_APCS_F0_QTMR_V1_BASE
-#define APCS_ALIAS1_IPC_INTERRUPT_1        (APPS_SS_BASE + 0x00011008)
-#define APCS_ALIAS0_IPC_INTERRUPT_2        (APPS_SS_BASE + 0x00111008)
-#define APCS_ALIAS0_IPC_INTERRUPT          platform_get_apcs_ipc_base()
-
-#define GIC_DIST_REG(off)           (MSM_GIC_DIST_BASE + (off))
-
-#define GIC_DIST_CTRL               GIC_DIST_REG(0x000)
-#define GIC_DIST_CTR                GIC_DIST_REG(0x004)
-#define GIC_DIST_ENABLE_SET         GIC_DIST_REG(0x100)
-#define GIC_DIST_ENABLE_CLEAR       GIC_DIST_REG(0x180)
-#define GIC_DIST_PENDING_SET        GIC_DIST_REG(0x200)
-#define GIC_DIST_PENDING_CLEAR      GIC_DIST_REG(0x280)
-#define GIC_DIST_ACTIVE_BIT         GIC_DIST_REG(0x300)
-#define GIC_DIST_PRI                GIC_DIST_REG(0x400)
-#define GIC_DIST_TARGET             GIC_DIST_REG(0x800)
-#define GIC_DIST_CONFIG             GIC_DIST_REG(0xc00)
-#define GIC_DIST_SOFTINT            GIC_DIST_REG(0xf00)
-
-#define GIC_CPU_REG(off)            (MSM_GIC_CPU_BASE  + (off))
-
-#define GIC_CPU_CTRL                GIC_CPU_REG(0x00)
-#define GIC_CPU_PRIMASK             GIC_CPU_REG(0x04)
-#define GIC_CPU_BINPOINT            GIC_CPU_REG(0x08)
-#define GIC_CPU_INTACK              GIC_CPU_REG(0x0c)
-#define GIC_CPU_EOI                 GIC_CPU_REG(0x10)
-#define GIC_CPU_RUNNINGPRI          GIC_CPU_REG(0x14)
-#define GIC_CPU_HIGHPRI             GIC_CPU_REG(0x18)
-
-
-void print_cpu_info() {
-    u64 midr;
-    asm("mrs %0, MIDR_EL1" : "=r"(midr));
-    logf(LOG_INFO, "MIDR Revision: %x", bits(midr, 3, 0));
-    logf(LOG_INFO, "MIDR PartNum: %x", bits(midr, 15, 4));
-    logf(LOG_INFO, "MIDR Architecture: %x", bits(midr, 19, 16));
-    logf(LOG_INFO, "MIDR Variant: %x", bits(midr, 23, 20));
-    logf(LOG_INFO, "MIDR Implementer: %x", bits(midr, 31, 24));
-
-    u32 iidr = readu32(GICC_IIDR);
-    logf(LOG_INFO, "IIDR Implementer: %x", bits(iidr, 11, 0));
-    logf(LOG_INFO, "IIDR Revision: %x", bits(iidr, 15, 12));
-    logf(LOG_INFO, "IIDR Architecture version: %x", bits(iidr, 19, 16));
-    logf(LOG_INFO, "IIDR ProductID: %x", bits(iidr, 31, 20));
-
-    u32 revidr;
-    asm("mrs %0, REVIDR_EL1" : "=r"(revidr));
-    logf(LOG_INFO, "REVIDR_EL1: %d", revidr);
-
-    u64 feats0;
-    asm("mrs %0, ID_AA64PFR0_EL1" : "=r"(feats0));
-    logf(LOG_INFO, "EL0 handling: %d", bits(feats0, 3, 0));
-    logf(LOG_INFO, "EL1 handling: %d", bits(feats0, 7, 4));
-    logf(LOG_INFO, "EL2 handling: %d", bits(feats0, 11, 8));
-    logf(LOG_INFO, "EL3 handling: %d", bits(feats0, 15, 12));
-    logf(LOG_INFO, "FP: %d", bits(feats0, 19, 16));
-    logf(LOG_INFO, "AdvSIMD: %d", bits(feats0, 23, 20));
-    logf(LOG_INFO, "GIC: %d", bits(feats0, 27, 24));
-
-    u64 cbar;
-    asm("mrs %0, S3_1_C15_C3_0" : "=r"(cbar));
-    logf(LOG_INFO, "PERIPHBASE: %x", cbar);
+void set_vector_table(u64* addr) {
+    /* u64* base = (void*)0x80000000; */
+    /* u64 base = get_vbar(); */
+    /* logf(LOG_INFO, "%X", base); */
+    /* logf(LOG_INFO, "%X", addr); */
+    set_vbar((u64)addr);
+    /* addr = 0; */
+    /* logf(LOG_INFO, "%X", addr); */
+    /* addr = (void*)get_vbar(); */
+    /* logf(LOG_INFO, "%X", addr); */
 }
 
+u8 qgic_get_cpumask() {
+    for (u32 i = 0; i < 32; i += 4) {
+        u32 mask = 0;
+        mask = readu32(GIC_DIST_TARGET + i);
+        mask |= mask >> 16;
+        mask |= mask >> 8;
+        if (mask)
+            return mask;
+    }
+    return 0;
+}
+
+void qgic_dist_init() {
+    u32 cpumask = qgic_get_cpumask();
+    cpumask |= cpumask << 8;
+    cpumask |= cpumask << 16;
+    logf(LOG_INFO, "cpumask: %x", cpumask);
+
+    u32 gic_ctrl = readu32(GIC_DIST_CTRL);
+    logf(LOG_INFO, "gic ctrl: %x", gic_ctrl);
+
+    writeu32(GIC_DIST_CTRL, 0);
+
+    u32 num_irq = readu32(GIC_DIST_CTR) & 0x1f;
+    logf(LOG_INFO, "num irq: %z", num_irq);
+
+    for (u32 i = 0; i < num_irq; i += 4) {
+        writeu32(GIC_DIST_TARGET + i, cpumask);
+        /* logf(LOG_INFO, "target %z: %x", i, readu32(GIC_DIST_TARGET + i)); */
+    }
+
+    for (u32 i = 32; i < num_irq; i += 16)
+      writeu32(GIC_DIST_CONFIG + i * 4 / 16, 0xffffffff);
+
+    writeu32(GIC_DIST_CONFIG + 4, 0xffffffff);
+
+    /* Set priority of all interrupts */
+
+    /*
+     * In bootloader we dont care about priority so
+     * setting up equal priorities for all
+     */
+    for (u32 i = 0; i < num_irq; i += 4)
+      writeu32(GIC_DIST_PRI + i, 0xa0a0a0a0);
+
+    /* Disabling interrupts */
+    for (u32 i = 0; i < num_irq; i += 32)
+      writeu32(GIC_DIST_ENABLE_CLEAR + i * 4 / 32, 0xffffffff);
+
+    writeu32(GIC_DIST_ENABLE_SET, 0x0000ffff);
+
+    writeu32(GIC_DIST_CTRL, 1);
+}
+
+void qgic_cpu_init(void) {
+    writeu32(GIC_CPU_PRIMASK, 0xf0);
+    writeu32(GIC_CPU_CTRL, 1);
+}
+
+// void enable_interrupts()
+
+void qtimer_disable() {
+    u32 ctrl = readu32(QTMR_V1_CNTP_CTL);
+
+    log(LOG_INFO, "disable qtimer");
+    logf(LOG_INFO, "qtimer ctrl: %x", ctrl);
+
+    ctrl &= ~QTMR_TIMER_CTRL_ENABLE;
+    ctrl |= QTMR_TIMER_CTRL_INT_MASK;
+
+    writeu32(QTMR_V1_CNTP_CTL, ctrl);
+    // dsb
+}
+
+void qtimer_enable() {
+    u32 ctrl = readu32(QTMR_V1_CNTP_CTL);
+
+    log(LOG_INFO, "enable qtimer");
+    logf(LOG_INFO, "qtimer ctrl: %x", ctrl);
+
+    ctrl |= QTMR_TIMER_CTRL_ENABLE;
+    ctrl &= ~QTMR_TIMER_CTRL_INT_MASK;
+
+    writeu32(QTMR_V1_CNTP_CTL, ctrl);
+    // dsb
+}
+
+void gic_unmask_interrupt(unsigned int vector) {
+    u32 reg = GIC_DIST_ENABLE_SET + (vector / 32) * 4;
+    u32 bit = 1 << (vector & 31);
+
+    writeu32(reg, bit);
+}
+
+extern u64 vector_table;
+
+void synchronous(u64 esr, u64 elr, u64 spsr, u64 far) {
+    logf(LOG_INFO, "synchronous: esr: %x elr: %x spsr: %x far: %x", esr, elr, spsr, far);
+    edl_reboot();
+}
+
+u64 irq(u64 iar) {
+    log(LOG_INFO, "irq");
+    edl_reboot();
+    return iar;
+}
+
+void fiq() {
+    log(LOG_INFO, "fiq");
+    edl_reboot();
+}
+
+void serror() {
+    log(LOG_INFO, "serror");
+    edl_reboot();
+}
 
 void main() {
     clear_debug_buffer();
 
     log(LOG_INFO, "hello from main");
+    logf(LOG_INFO, "vector_table: %X", &vector_table);
 
-    print_cpu_info();
+    set_vector_table(&vector_table);
+    qgic_dist_init();
+    qgic_cpu_init();
+    gic_unmask_interrupt(19);
 
-    u64 current_el;
-    asm("mrs %0, CurrentEL" : "=r"(current_el));
-    logf(LOG_INFO, "current EL: %z", current_el >> 2);
+    qtimer_disable();
+    u32 msecs_interval = 1000;
+    u32 tick_count = msecs_interval * QTIMER_FREQ / 1000;
+    writeu32(QTMR_V1_CNTP_TVAL, tick_count);
+    qtimer_enable();
 
-    /* logf(LOG_INFO, "gic ctl: %x", readu32(GIC_DIST_CTRL)); */
+    asm volatile("msr daifclr, #2" ::: "memory");
 
-    /* writeu32(GIC_DIST_CTRL, 0); */
+    for (volatile u32 i = 0; i < 10000000; i++);
 
-    /* u32 cpumask = 0; */
-
-    /* for (u32 i = 0; i < 32; i += 4) { */
-    /*     cpumask = readu32(GIC_DIST_TARGET + i); */
-    /*     cpumask |= cpumask >> 16; */
-    /*     cpumask |= cpumask >> 8; */
-    /*     if (cpumask) */
-    /*         break; */
-    /* } */
-
-    /* cpumask |= cpumask << 8; */
-    /* cpumask |= cpumask << 16; */
-
-    /* logf(LOG_INFO, "cpumask: %x", cpumask); */
-
-    /* u32 num_irq = readu32(GIC_DIST_CTR) & 0x1f; */
-    /* logf(LOG_INFO, "num_irq: %d", num_irq); */
+    log(LOG_INFO, "reboot");
 
     edl_reboot();
 
