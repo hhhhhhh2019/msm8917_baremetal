@@ -1,0 +1,81 @@
+           CPU0       CPU1       CPU2       CPU3
+ 11:       4044       3826       4019       2918 GIC-0  20 Level     arch_timer
+ 14:          0          0          0          0 GIC-0 194 Level     bam_dma
+ 15:          0          0          0          0 GIC-0 270 Level     bam_dma
+ 16:          0          0          0          0 GIC-0 271 Level     bam_dma
+ 17:          0          0          0          0 GIC-0 143 Level     qcom-iommu-fault
+ 18:          0          0          0          0 GIC-0 144 Level     qcom-iommu-fault
+ 19:          0          0          0          0 GIC-0 145 Level     qcom-iommu-fault
+ 20:          0          0          0          0 GIC-0 147 Level     qcom-iommu-fault
+ 21:          0          0          0          0 GIC-0 272 Level     qcom-iommu-fault
+ 23:          0          0          0          0 pmic_arb 101777448 Edge      pm8xxx_rtc_alarm
+ 24:         18          0          0          0 GIC-0 128 Level     i2c_qup
+ 25:         37          0          0          0 GIC-0 129 Level     i2c_qup
+ 26:          0          0          0          0 pmic_arb 8388655 Edge      pm8941_pwrkey
+ 27:          0          0          0          0 pmic_arb 8454191 Edge      pm8941_resin
+ 29:       1847       1208       2888       1472 GIC-0  39 Level     arch_mem_timer
+ 30:          5          0          0          0 pmic_arb 51380268 Edge      spmi-vadc
+ 31:          0          0          0          0 GIC-0  23 Level     arm-pmu
+ 32:        162          0          0          0 GIC-0 200 Edge      smd-edge
+ 33:          5          0          0          0 GIC-0 323 Edge      smp2p-adsp
+ 34:          2          0          0          0 GIC-0  59 Edge      smp2p-modem
+ 35:          5          0          0          0 GIC-0 175 Edge      smp2p-wcnss
+ 36:          0          0          0          0 GIC-0  58 Edge      smsm
+ 37:          0          0          0          0 GIC-0 176 Edge      smsm
+ 38:          0          0          0          0 GIC-0 216 Level     4a9000.thermal-sensor
+ 39:          0          0          0          0 pmic_arb 37748779 Edge      temp-alarm
+ 40:          0          0          0          0  msmgpio  91 Edge      Volume Up
+ 41:       7005          0          0          0 GIC-0 155 Level     mmc1
+ 42:       4529          0          0          0 GIC-0 157 Level     mmc0
+ 43:          1          0          0          0 GIC-0 170 Level     7824900.mmc
+ 44:          2          0          0          0 GIC-0 253 Level     7864900.mmc
+ 45:       1584          0          0          0 GIC-0 166 Level     ci_hdrc_msm
+ 46:          0          0          0          0  msmgpio  67 Edge      7864900.mmc cd
+ 47:          3          0          0          0  msmgpio  65 Edge      gt911
+ 49:       2257          0          0          0 msm_mdss   0 Edge      msm
+ 50:          3          0          0          0 msm_mdss   4 Edge      dsi_isr
+ 51:          3          0          0          0 GIC-0  82 Edge      1b0c000.cci
+ 52:          0          0          0          0 GIC-0  56 Edge      q6v5 wdog
+ 53:          0          0          0          0 smp2p-modem   0 Edge      q6v5 fatal
+ 54:          1          0          0          0 smp2p-modem   1 Edge      q6v5 ready
+ 55:          1          0          0          0 smp2p-modem   2 Edge      q6v5 handover
+ 56:          0          0          0          0 smp2p-modem   3 Edge      q6v5 stop
+ 57:          0          0          0          0 GIC-0 181 Edge      wcnss
+ 58:          0          0          0          0 smp2p-wcnss   0 Edge      wcnss
+ 59:          1          0          0          0 smp2p-wcnss   1 Edge      wcnss
+ 60:          1          0          0          0 smp2p-wcnss   2 Edge      wcnss
+ 61:          0          0          0          0 smp2p-wcnss   3 Edge      wcnss
+ 62:          0          0          0          0 GIC-0  65 Level     gpu-irq
+ 63:          5          0          0          0 GIC-0  76 Level     venus
+ 64:          0          0          0          0 GIC-0 110 Edge      1b34000.camss_msm_csiphy0
+ 65:          0          0          0          0 GIC-0 111 Edge      1b34000.camss_msm_csiphy1
+ 66:          0          0          0          0 GIC-0  89 Edge      1b34000.camss_msm_vfe0
+ 67:          0          0          0          0 GIC-0  61 Edge      1b34000.camss_msm_vfe1
+ 68:          0          0          0          0 GIC-0  83 Edge      1b34000.camss_msm_csid0
+ 69:          0          0          0          0 GIC-0  84 Edge      1b34000.camss_msm_csid1
+ 70:          0          0          0          0 GIC-0 185 Edge      1b34000.camss_msm_csid2
+ 71:          0          0          0          0 GIC-0  87 Edge      1b34000.camss_msm_ispif
+ 72:          0          0          0          0 GIC-0 325 Edge      q6v5 wdog
+ 73:          0          0          0          0 smp2p-adsp   0 Edge      q6v5 fatal
+ 74:          1          0          0          0 smp2p-adsp   1 Edge      q6v5 ready
+ 75:          1          0          0          0 smp2p-adsp   2 Edge      q6v5 handover
+ 76:          0          0          0          0 smp2p-adsp   3 Edge      q6v5 stop
+ 77:          0          0          0          0 pmic_arb 520552497 Edge      mbhc switch irq
+ 78:          1          0          0          0 pmic_arb 520421425 Edge      mbhc btn press irq
+ 79:          0          0          0          0 pmic_arb 520355889 Edge      mbhc btn release irq
+ 80:          0          0          0          0     smsm   1 Edge      4080000.remoteproc:bam-dmux
+ 81:          0          0          0          0     smsm  11 Edge      4080000.remoteproc:bam-dmux
+ 82:        137          0          0          0 GIC-0 321 Edge      smd-edge
+ 83:        124          0          0          0 GIC-0 174 Edge      smd-edge
+ 84:          0          0          0          0 GIC-0 177 Level     wcn36xx_tx
+ 85:         66          0          0          0 GIC-0 178 Level     wcn36xx_rx
+ 86:         82          0          0          0 GIC-0  57 Edge      smd-edge
+IPI0:      1360       1485       1775       1974       Rescheduling interrupts
+IPI1:      3250       6347       4777       3950       Function call interrupts
+IPI2:         0          0          0          0       CPU stop interrupts
+IPI3:         0          0          0          0       CPU stop NMIs
+IPI4:       802        682       1468       1546       Timer broadcast interrupts
+IPI5:       331        313        287        282       IRQ work interrupts
+IPI6:         0          0          0          0       CPU backtrace interrupts
+IPI7:         0          0          0          0       KGDB roundup interrupts
+Err:          0

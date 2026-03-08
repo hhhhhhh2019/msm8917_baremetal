@@ -28,8 +28,8 @@ gpiochip0: 134 GPIOs, parent: platform/1000000.pinctrl, 1000000.pinctrl:
  gpio26  : in  low  func0 2mA pull down
  gpio27  : in  low  func0 2mA pull down
  gpio28  : in  low  func1 2mA no pull
- gpio29  : in  high func1 2mA no pull
- gpio30  : in  high func1 2mA no pull
+ gpio29  : in  low  func1 2mA no pull
+ gpio30  : in  low  func1 2mA no pull
  gpio31  : in  low  func0 2mA pull down
  gpio32  : in  low  func0 2mA pull down
  gpio33  : in  low  func0 2mA pull down
@@ -59,12 +59,12 @@ gpiochip0: 134 GPIOs, parent: platform/1000000.pinctrl, 1000000.pinctrl:
  gpio57  : out low  func0 2mA no pull
  gpio58  : in  low  func1 2mA pull up
  gpio59  : out low  func0 2mA no pull
- gpio60  : out high func0 8mA no pull
+ gpio60  : out low  func0 2mA pull down
  gpio61  : in  low  func0 2mA pull down
  gpio62  : in  low  func0 2mA pull down
  gpio63  : in  low  func0 2mA pull down
- gpio64  : in  high func0 2mA pull down
- gpio65  : in  low  func0 2mA pull down
+ gpio64  : out high func0 8mA pull up
+ gpio65  : in  low  func0 8mA pull up
  gpio66  : in  low  func0 2mA pull down
  gpio67  : in  low  func0 2mA no pull
  gpio68  : in  low  func0 2mA pull down
@@ -125,8 +125,8 @@ gpiochip0: 134 GPIOs, parent: platform/1000000.pinctrl, 1000000.pinctrl:
  gpio123 : in  low  func0 2mA pull down
  gpio124 : out high func0 2mA no pull
  gpio125 : in  low  func0 2mA pull down
- gpio126 : out high func0 2mA pull down
- gpio127 : out high func0 2mA pull down
+ gpio126 : out low  func0 2mA pull down
+ gpio127 : out low  func0 2mA pull down
  gpio128 : in  low  func0 2mA pull down
  gpio129 : out high func0 2mA no pull
  gpio130 : in  low  func0 2mA pull down

@@ -1,0 +1,21 @@
+#+title: Прерывания
+
+* Прерывания
+https://developer.arm.com/documentation/102412/0103/Handling-exceptions/Taking-an-exception
+
+| VBAR_ELx + смещение | тип            | описание                                                       |
+|---------------------+----------------+----------------------------------------------------------------|
+|                 0x0 | Synchronous    |                                                                |
+|                0x80 | IRQ/vIRQ       |                                                                |
+|               0x100 | FIQ/vFIQ       |                                                                |
+|               0x180 | SError/VSError | Exception from the current EL while using SP_EL0               |
+|                 ... |                | все почти в точности повторяется еще 3 раза                    |
+|               0x380 | SError/VSError | Exception from the current EL while using SP_ELx               |
+|               0x580 | SError/VSError | Exception from a lower EL and at least one lower EL is AArch64 |
+|               0x780 | SError/VSError | Exception from a lower EL and all lower ELs are AArch32        |
+
+запись и чтение работает также как и с другими системными регистрами:
+запись - `msr VBAR_EL1, x%`
+чтение - `mrs x%, VBAR_EL1`
+
+выход из прерывания через команду `eret`
