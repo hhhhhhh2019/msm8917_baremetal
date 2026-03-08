@@ -201,9 +201,13 @@ void synchronous(u64 esr, u64 elr, u64 spsr, u64 far) {
     edl_reboot();
 }
 
+void start_timer();
+
 u64 irq(u64 iar) {
-    log(LOG_INFO, "irq");
-    edl_reboot();
+    iar = readu32(GIC_CPU_INTACK);
+    logf(LOG_INFO, "irq: %x", iar & 0x3ff);
+    start_timer();
+    /* edl_reboot(); */
     return iar;
 }
 
@@ -217,6 +221,14 @@ void serror() {
     edl_reboot();
 }
 
+void start_timer() {
+    qtimer_disable();
+    u32 msecs_interval = 1000;
+    u32 tick_count = msecs_interval * QTIMER_FREQ / 1000;
+    writeu32(QTMR_V1_CNTP_TVAL, tick_count);
+    qtimer_enable();
+}
+
 void main() {
     clear_debug_buffer();
 
@@ -226,15 +238,18 @@ void main() {
     set_vector_table(&vector_table);
     qgic_dist_init();
     qgic_cpu_init();
-    gic_unmask_interrupt(19);
+    /* gic_unmask_interrupt(19); */
 
-    qtimer_disable();
-    u32 msecs_interval = 1000;
-    u32 tick_count = msecs_interval * QTIMER_FREQ / 1000;
-    writeu32(QTMR_V1_CNTP_TVAL, tick_count);
-    qtimer_enable();
+    start_timer();
 
-    asm volatile("msr daifclr, #2" ::: "memory");
+    /*
+     D or bit 9 - when it’s set to 1, debug exceptions are masked;
+     A or bit 8 - when it’s set to 1, SError is masked;
+     I or bit 7 - when it’s set to 1, IRQs are masked;
+     F or bit 6 - when it’s set to 1, FIQs are masked.
+     */
+    asm volatile("msr daifset, #15" ::: "memory");
+    asm volatile("msr daifclr, #15" ::: "memory");
 
     for (volatile u32 i = 0; i < 10000000; i++);
 

@@ -20,7 +20,7 @@ $(BUILD)/boot.img: $(BUILD)/bootloader-dtb
 		--output $@ \
 		--kernel $< \
 		--ramdisk ramdisk.img \
-		--base 0x80000000
+		--base 0x80080000
 
 $(BUILD)/bootloader-dtb: $(BUILD)/bootloader.gz
 	# cat $< ~/opt/lk2nd/build-lk2nd-msm8952/lk2nd/device/dts/msm8952/msm8917-xiaomi-common.dtb > $@
