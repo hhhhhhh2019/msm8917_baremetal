@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "gpio.h"
 
+u8* base;
+
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
 #define QTIMER_FREQ 0x124f800
@@ -164,9 +166,6 @@ void qgic_cpu_init(void) {
 void qtimer_disable() {
     u32 ctrl = readu32(QTMR_V1_CNTP_CTL);
 
-    log(LOG_INFO, "disable qtimer");
-    logf(LOG_INFO, "qtimer ctrl: %x", ctrl);
-
     ctrl &= ~QTMR_TIMER_CTRL_ENABLE;
     ctrl |= QTMR_TIMER_CTRL_INT_MASK;
 
@@ -178,9 +177,6 @@ void qtimer_disable() {
 
 void qtimer_enable() {
     u32 ctrl = readu32(QTMR_V1_CNTP_CTL);
-
-    log(LOG_INFO, "enable qtimer");
-    logf(LOG_INFO, "qtimer ctrl: %x", ctrl);
 
     ctrl |= QTMR_TIMER_CTRL_ENABLE;
     ctrl &= ~QTMR_TIMER_CTRL_INT_MASK;
@@ -207,13 +203,13 @@ void synchronous(u64 esr, u64 elr, u64 spsr, u64 far) {
 
 void start_timer();
 
-u32 tick = 0;
+u32 tick;
 
 void irq() {
     u32 iar = readu32(GIC_CPU_INTACK);
     logf(LOG_INFO, "irq: %x, tick: %d", iar & 0x3ff, tick);
 
-    if (tick == 10) {
+    if (tick == 5) {
         edl_reboot();
         while (1);
     }
@@ -221,6 +217,12 @@ void irq() {
 
     start_timer();
     writeu32(GIC_CPU_EOI, iar);
+
+    if (tick % 2 == 1)
+        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
+    else
+        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
+
     /* edl_reboot(); */
 }
 
@@ -236,9 +238,7 @@ void serror() {
 
 void start_timer() {
     qtimer_disable();
-    u32 msecs_interval = 100000;
-    u32 tick_count = msecs_interval * QTIMER_FREQ / 1000;
-    writeu32(QTMR_V1_CNTP_TVAL, 10000000);
+    writeu32(QTMR_V1_CNTP_TVAL, QTIMER_FREQ * 10);
     qtimer_enable();
 }
 
@@ -248,6 +248,8 @@ void main() {
 
     log(LOG_INFO, "hello from main");
     logf(LOG_INFO, "vector_table: %X", &vector_table);
+
+    tlmm_mode(93, GPIO_OUTPUT);
 
     set_vector_table(&vector_table);
     qgic_dist_init();

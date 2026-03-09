@@ -30,8 +30,8 @@ enum GPIODStr {
 };
 
 enum GPIODir {
-    GPIO_INPUT  = 0,
-    GPIO_OUTPUT = 1,
+    GPIO_INPUT  = 1,
+    GPIO_OUTPUT = 2,
 };
 
 enum GPIOStatus {
