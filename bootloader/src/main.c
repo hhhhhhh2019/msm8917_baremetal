@@ -171,6 +171,8 @@ void qtimer_disable() {
     ctrl |= QTMR_TIMER_CTRL_INT_MASK;
 
     writeu32(QTMR_V1_CNTP_CTL, ctrl);
+
+    asm("isb");
     // dsb
 }
 
@@ -184,6 +186,8 @@ void qtimer_enable() {
     ctrl &= ~QTMR_TIMER_CTRL_INT_MASK;
 
     writeu32(QTMR_V1_CNTP_CTL, ctrl);
+
+    asm("isb");
     // dsb
 }
 
@@ -203,12 +207,21 @@ void synchronous(u64 esr, u64 elr, u64 spsr, u64 far) {
 
 void start_timer();
 
-u64 irq(u64 iar) {
-    iar = readu32(GIC_CPU_INTACK);
-    logf(LOG_INFO, "irq: %x", iar & 0x3ff);
+u32 tick = 0;
+
+void irq() {
+    u32 iar = readu32(GIC_CPU_INTACK);
+    logf(LOG_INFO, "irq: %x, tick: %d", iar & 0x3ff, tick);
+
+    if (tick == 10) {
+        edl_reboot();
+        while (1);
+    }
+    tick++;
+
     start_timer();
+    writeu32(GIC_CPU_EOI, iar);
     /* edl_reboot(); */
-    return iar;
 }
 
 void fiq() {
@@ -223,14 +236,15 @@ void serror() {
 
 void start_timer() {
     qtimer_disable();
-    u32 msecs_interval = 1000;
+    u32 msecs_interval = 100000;
     u32 tick_count = msecs_interval * QTIMER_FREQ / 1000;
-    writeu32(QTMR_V1_CNTP_TVAL, tick_count);
+    writeu32(QTMR_V1_CNTP_TVAL, 10000000);
     qtimer_enable();
 }
 
 void main() {
     clear_debug_buffer();
+    tick = 0;
 
     log(LOG_INFO, "hello from main");
     logf(LOG_INFO, "vector_table: %X", &vector_table);
@@ -251,7 +265,8 @@ void main() {
     asm volatile("msr daifset, #15" ::: "memory");
     asm volatile("msr daifclr, #15" ::: "memory");
 
-    for (volatile u32 i = 0; i < 10000000; i++);
+    /* for (volatile u32 i = 0; i < 10000000; i++); */
+    while (1);
 
     log(LOG_INFO, "reboot");
 
