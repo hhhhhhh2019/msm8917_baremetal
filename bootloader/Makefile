@@ -1,18 +1,22 @@
 include ../Makefile.defaults
 
 BUILD=build
-SRC=src/head.S src/main.c src/str.c src/spmi.c src/log.c src/gpio.c src/qtimer.c src/interrupts.c
-OBJ=$(patsubst src/%.S,$(BUILD)/%.o,$(patsubst src/%.c,$(BUILD)/%.o,$(SRC)))
+SRC=$(shell find ./src -type f -name '*.c' -o -name '*.S')
+OBJ:=$(SRC:.c=.o)
+OBJ:=$(OBJ:.S=.o)
+OBJ:=$(patsubst ./src/%,./$(BUILD)/%,$(OBJ))
 DEP=$(OBJ:.o=.d)
 
 AS_FLAGS+=
 CC_FLAGS+=-MMD -MP -mgeneral-regs-only -I./include
 LD_FLAGS+=-gc-sections
 
-$(BUILD)/%.o: src/%.S | $(BUILD)
+$(BUILD)/%.o: src/%.S
+	@mkdir -p `dirname $@`
 	$(AS) $(AS_FLAGS) -c $< -o $@
 
-$(BUILD)/%.o: src/%.c | $(BUILD)
+$(BUILD)/%.o: src/%.c
+	@mkdir -p `dirname $@`
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 $(BUILD)/boot.img: $(BUILD)/bootloader-dtb
@@ -34,9 +38,6 @@ $(BUILD)/bootloader: $(BUILD)/bootloader.elf
 
 $(BUILD)/bootloader.elf: $(OBJ) | $(BUILD)
 	$(LD) $(LD_FLAGS) -T linker.ld -Map=$(BUILD)/bootloader.elf.map $^ -o $@
-
-$(BUILD):
-	@mkdir -p $@
 
 -include $(DEP)
 
