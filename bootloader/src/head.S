@@ -80,7 +80,7 @@ sync_handler:
     mrs x1, elr_el1
     mrs x2, spsr_el1
     mrs x3, far_el1
-    bl synchronous
+    bl int_sync_handler
 
     ldp x0, x1, [sp, #0]
     ldp x2, x3, [sp, #16]
@@ -95,6 +95,7 @@ sync_handler:
     ldp x30, xzr, [sp, #160]
     add sp, sp, #192
     eret
+
 irq_handler:
     msr daifset, #15
 
@@ -112,7 +113,7 @@ irq_handler:
     stp x30, xzr, [sp, #160]
 
     //mrs x0, ICC_IAR1_EL1
-    bl irq
+    bl int_irq_handler
     //msr ICC_EOIR1_EL1, x0
 
     ldp x0, x1, [sp, #0]
@@ -130,6 +131,7 @@ irq_handler:
 
     msr daifclr, #15
     eret
+
 fiq_handler:
     sub sp, sp, #192
     stp x0, x1, [sp, #0]
@@ -144,7 +146,7 @@ fiq_handler:
     stp x18, x29, [sp, #144]
     stp x30, xzr, [sp, #160]
 
-    bl fiq
+    bl int_fiq_handler
 
     ldp x0, x1, [sp, #0]
     ldp x2, x3, [sp, #16]
@@ -159,6 +161,7 @@ fiq_handler:
     ldp x30, xzr, [sp, #160]
     add sp, sp, #192
     eret
+
 serror_handler:
     sub sp, sp, #192
     stp x0, x1, [sp, #0]
@@ -173,7 +176,7 @@ serror_handler:
     stp x18, x29, [sp, #144]
     stp x30, xzr, [sp, #160]
 
-    bl serror
+    bl int_serror_handler
 
     ldp x0, x1, [sp, #0]
     ldp x2, x3, [sp, #16]

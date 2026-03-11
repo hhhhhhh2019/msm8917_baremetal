@@ -24,4 +24,6 @@
 
 #define bits(n, e, s) (((n) >> (s)) & (1 << ((e) - (s) + 1)) - 1)
 
+void edl_reboot();
+
 #endif // UTILS_H_

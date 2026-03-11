@@ -41,4 +41,7 @@
 #define GIC_CPU_RUNNINGPRI          (MSM_GIC_CPU_BASE + 0x14)
 #define GIC_CPU_HIGHPRI             (MSM_GIC_CPU_BASE + 0x18)
 
+#define GIC_PPI_START 16
+#define GIC_SPI_START 32
+
 #endif // GIC_H_
