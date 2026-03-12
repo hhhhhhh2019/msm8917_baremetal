@@ -76,12 +76,12 @@ void int_sync_handler(u64 esr, u64 elr, u64 spsr, u64 far) {
     edl_reboot();
 }
 
-void int_irq_handler() {
+void int_irq_handler(struct registers* regs) {
     u32 iar = readu32(GIC_CPU_INTACK);
     u32 irq = iar & 0x3ff;
     logf(LOG_INFO, "irq: %x, iar: %x", irq, iar);
 
-    irq_handlers[irq](irq);
+    irq_handlers[irq](irq, regs);
 
     writeu32(GIC_CPU_EOI, iar);
 }

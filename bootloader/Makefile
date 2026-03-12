@@ -39,6 +39,9 @@ $(BUILD)/bootloader: $(BUILD)/bootloader.elf
 $(BUILD)/bootloader.elf: $(OBJ) | $(BUILD)
 	$(LD) $(LD_FLAGS) -T linker.ld -Map=$(BUILD)/bootloader.elf.map $^ -o $@
 
+run: $(BUILD)/boot.img
+	edl reset && fastboot boot build/boot.img && edl peek 0x90000000 0x1000 dump && cat dump
+
 -include $(DEP)
 
-.PHONY: $(BUILD)/boot.img
+.PHONY: $(BUILD)/boot.img run
