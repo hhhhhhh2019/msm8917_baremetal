@@ -8,9 +8,23 @@ SECTIONS {
         *(.text*)
     }
 
+    .rodata : {
+        *(.rodata)
+    }
+
+    .data : {
+        *(.data)
+    }
+
     __data_end = .;
 
-    . = ALIGN(8);
+    .bss : {
+        _bss_start = .;
+        *(.bss)
+        _bss_end = .;
+    }
+
+    . = ALIGN(16);
     . = . + 0x1000;
     _stack_top = .;
 }
