@@ -108,6 +108,8 @@ unimplemented_handler:
 
 .balign 2048
 vector_table:
+    // sync, irq, fiq, serror
+
     // Current EL with SP0
     .org vector_table + 0x000; b unimplemented_handler
     .org vector_table + 0x080; b unimplemented_handler
@@ -116,7 +118,7 @@ vector_table:
 
     // Current EL with SPx (Kernel Modes)
     .org vector_table + 0x200; b unimplemented_handler
-    .org vector_table + 0x280; b unimplemented_handler
+    .org vector_table + 0x280; b irq_handler
     .org vector_table + 0x300; b unimplemented_handler
     .org vector_table + 0x380; b unimplemented_handler
 
