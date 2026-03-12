@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "qtimer.h"
 #include "interrupts.h"
+#include "gic.h"
 
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
@@ -125,8 +126,8 @@ void main() {
     logf(LOG_INFO, "vector_table: %X", &vector_table);
 
     set_vector_table(&vector_table);
-    qgic_dist_init();
-    qgic_cpu_init();
+    gic_init();
+    gic_unmask_interrupt(19);
 
     set_irq_handler(289, &timer_handler);
 
@@ -136,7 +137,7 @@ void main() {
      I or bit 7 - when it’s set to 1, IRQs are masked;
      F or bit 6 - when it’s set to 1, FIQs are masked.
      */
-    /* asm volatile("msr daifset, #15" ::: "memory"); */
+    asm volatile("msr daifset, #15" ::: "memory");
     asm volatile("msr daifclr, #15" ::: "memory");
 
     start_timer(100);
