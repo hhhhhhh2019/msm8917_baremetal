@@ -4,7 +4,7 @@ SECTIONS {
     . = 0x80080000;
 
     .text : {
-        *(.text._start)
+        *(.text.head)
         *(.text*)
     }
 

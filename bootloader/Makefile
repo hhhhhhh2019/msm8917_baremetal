@@ -1,6 +1,6 @@
 include ../Makefile.defaults
 
-BUILD=build
+BUILD?=build
 SRC=$(shell find ./src -type f -name '*.c' -o -name '*.S')
 OBJ:=$(SRC:.c=.o)
 OBJ:=$(OBJ:.S=.o)
