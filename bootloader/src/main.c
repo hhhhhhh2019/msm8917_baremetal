@@ -142,7 +142,7 @@ void main() {
 
     start_timer(100);
 
-    foo();
+    for (volatile u32 i = 0; i < 100000; i++);
 
     log(LOG_INFO, "reboot");
 

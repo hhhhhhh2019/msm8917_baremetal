@@ -35,15 +35,15 @@ get_vbar:
     stp x28, x29, [sp, #16 * 14]
     str x30,      [sp, #16 * 15]
 
-    mrs x0, elr_el1
-    mrs x1, spsr_el1
-    stp x0, x1, [sp, #16 * 16]
+    ;; mrs x0, elr_el1
+    ;; mrs x1, spsr_el1
+    ;; stp x0, x1, [sp, #16 * 16]
 .endm
 
 .macro int_exit
-    ldp x0, x1, [sp, #16 * 16]
-    msr elr_el1, x0
-    msr spsr_el1, x1
+    ;; ldp x0, x1, [sp, #16 * 16]
+    ;; msr elr_el1, x0
+    ;; msr spsr_el1, x1
 
     ldp  x0,  x1, [sp, #16 * 0]
     ldp  x2,  x3, [sp, #16 * 1]
@@ -99,11 +99,28 @@ serror_handler:
 
     int_exit
 
-unimplemented_handler:
+unimplemented_sync_handler:
     mov x0, xzr
-    ldr x1, =unimplemented_msg
+    ldr x1, =unimplemented_sync
     bl log
+    b edl_reboot
 
+unimplemented_irq_handler:
+    mov x0, xzr
+    ldr x1, =unimplemented_irq
+    bl log
+    b edl_reboot
+
+unimplemented_fiq_handler:
+    mov x0, xzr
+    ldr x1, =unimplemented_fiq
+    bl log
+    b edl_reboot
+
+unimplemented_serror_handler:
+    mov x0, xzr
+    ldr x1, =unimplemented_serror
+    bl log
     b edl_reboot
 
 .balign 2048
@@ -111,28 +128,34 @@ vector_table:
     // sync, irq, fiq, serror
 
     // Current EL with SP0
-    .org vector_table + 0x000; b unimplemented_handler
-    .org vector_table + 0x080; b unimplemented_handler
-    .org vector_table + 0x100; b unimplemented_handler
-    .org vector_table + 0x180; b unimplemented_handler
+    .org vector_table + 0x000; b unimplemented_sync_handler
+    .org vector_table + 0x080; b unimplemented_irq_handler
+    .org vector_table + 0x100; b unimplemented_fiq_handler
+    .org vector_table + 0x180; b unimplemented_serror_handler
 
     // Current EL with SPx (Kernel Modes)
-    .org vector_table + 0x200; b unimplemented_handler
+    .org vector_table + 0x200; b sync_handler
     .org vector_table + 0x280; b irq_handler
-    .org vector_table + 0x300; b unimplemented_handler
-    .org vector_table + 0x380; b unimplemented_handler
+    .org vector_table + 0x300; b unimplemented_fiq_handler
+    .org vector_table + 0x380; b unimplemented_serror_handler
 
     // Lower EL (User Mode - Future Proofing)
-    .org vector_table + 0x400; b unimplemented_handler
-    .org vector_table + 0x480; b unimplemented_handler
-    .org vector_table + 0x500; b unimplemented_handler
-    .org vector_table + 0x580; b unimplemented_handler
+    .org vector_table + 0x400; b unimplemented_sync_handler
+    .org vector_table + 0x480; b unimplemented_irq_handler
+    .org vector_table + 0x500; b unimplemented_fiq_handler
+    .org vector_table + 0x580; b unimplemented_serror_handler
 
-    .org vector_table + 0x600; b unimplemented_handler
-    .org vector_table + 0x680; b unimplemented_handler
-    .org vector_table + 0x700; b unimplemented_handler
-    .org vector_table + 0x780; b unimplemented_handler
+    .org vector_table + 0x600; b unimplemented_sync_handler
+    .org vector_table + 0x680; b unimplemented_irq_handler
+    .org vector_table + 0x700; b unimplemented_fiq_handler
+    .org vector_table + 0x780; b unimplemented_serror_handler
 
 .section .rodata
-unimplemented_msg:
-    .ascii "unimplemented exception"
+unimplemented_sync:
+    .ascii "unimplemented sync exception\0"
+unimplemented_irq:
+    .ascii "unimplemented irq\0"
+unimplemented_fiq:
+    .ascii "unimplemented fiq\0"
+unimplemented_serror:
+    .ascii "unimplemented serror exception\0"

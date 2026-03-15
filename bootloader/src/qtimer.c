@@ -10,7 +10,6 @@ void qtimer_enable() {
     writeu32(QTMR_V1_CNTP_CTL, ctrl);
 
     asm("isb");
-    // dsb
 }
 
 void qtimer_disable() {
@@ -22,7 +21,6 @@ void qtimer_disable() {
     writeu32(QTMR_V1_CNTP_CTL, ctrl);
 
     asm("isb");
-    // dsb
 }
 
 void start_timer(u64 ms) {

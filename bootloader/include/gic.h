@@ -22,7 +22,8 @@
 #define GICC_IIDR   (GICC_BASE + 0x00FC)
 #define GICC_DIR    (GICC_BASE + 0x1000)
 
-#define GICD_CTLR        (GICD_BASE + 0x100)
+#define GICD_CTLR        (GICD_BASE + 0x000)
+#define GICD_CTR         (GICD_BASE + 0x004)
 #define GICD_ENABLE_SET  (GICD_BASE + 0x100)
 #define GICD_ENABLE_CLR  (GICD_BASE + 0x180)
 #define GICD_PENDING_SET (GICD_BASE + 0x200)
@@ -33,29 +34,8 @@
 #define GICD_CONFIG      (GICD_BASE + 0xc00)
 #define GICD_SOFTINT     (GICD_BASE + 0xf00)
 
-/* #define GIC_DIST_CTRL               (GICC_BASE + 0x000) */
-/* #define GIC_DIST_CTR                (GICC_BASE + 0x004) */
-/* #define GIC_DIST_ENABLE_SET         (GICC_BASE + 0x100) */
-/* #define GIC_DIST_ENABLE_CLEAR       (GICC_BASE + 0x180) */
-/* #define GIC_DIST_PENDING_SET        (GICC_BASE + 0x200) */
-/* #define GIC_DIST_PENDING_CLEAR      (GICC_BASE + 0x280) */
-/* #define GIC_DIST_ACTIVE_BIT         (GICC_BASE + 0x300) */
-/* #define GIC_DIST_PRI                (GICC_BASE + 0x400) */
-/* #define GIC_DIST_TARGET             (GICC_BASE + 0x800) */
-/* #define GIC_DIST_CONFIG             (GICC_BASE + 0xc00) */
-/* #define GIC_DIST_SOFTINT            (GICC_BASE + 0xf00) */
-
-/* #define MSM_GIC_CPU_BASE            0xb002000 */
-/* #define GIC_CPU_CTRL                (MSM_GIC_CPU_BASE + 0x00) */
-/* #define GIC_CPU_PRIMASK             (MSM_GIC_CPU_BASE + 0x04) */
-/* #define GIC_CPU_BINPOINT            (MSM_GIC_CPU_BASE + 0x08) */
-/* #define GIC_CPU_INTACK              (MSM_GIC_CPU_BASE + 0x0c) */
-/* #define GIC_CPU_EOI                 (MSM_GIC_CPU_BASE + 0x10) */
-/* #define GIC_CPU_RUNNINGPRI          (MSM_GIC_CPU_BASE + 0x14) */
-/* #define GIC_CPU_HIGHPRI             (MSM_GIC_CPU_BASE + 0x18) */
-
 /* #define GIC_PPI_START 16 */
-/* #define GIC_SPI_STUART0_IMSC_GIC = (1 << 4);ART 32 */
+/* #define GIC_SPI_START 32 */
 
 void gic_init();
 
