@@ -37,7 +37,8 @@ struct registers {
     u64 x28;
     u64 x29;
     u64 x30;
-    u64 xzr;
+    u64 sp;
+    u64 elr_el1;
 };
 
 typedef void (*irq_handler)(u32 irq, struct registers*);
@@ -46,7 +47,7 @@ typedef void (*irq_handler)(u32 irq, struct registers*);
 void set_vbar(u64 addr);
 u64 get_vbar();
 
-static void set_vector_table(u64* addr) {
+static inline void set_vector_table(u64* addr) {
     set_vbar((u64)addr);
 }
 

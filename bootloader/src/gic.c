@@ -20,7 +20,7 @@ void gic_init() {
 
     logf(LOG_INFO, "gic iidr: %x", GICD_BASE + 8);
 
-    for (u32 i = 0; i < 128 / 8; i += 4)
+    for (u32 i = 0; i < 128 / 4; i += 4)
         writeu32(GICD_ENABLE_CLR + i, 0xffffffff);
 
     writeu32(GICD_CTLR, 1);
