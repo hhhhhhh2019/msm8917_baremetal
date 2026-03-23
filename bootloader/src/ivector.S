@@ -33,17 +33,18 @@ get_vbar:
     stp x24, x25, [sp, #16 * 12]
     stp x26, x27, [sp, #16 * 13]
     stp x28, x29, [sp, #16 * 14]
-    str x30,      [sp, #16 * 15]
+    add x0, sp, #16 * 17
+    stp x30, x0,  [sp, #16 * 15]
 
-    ;; mrs x0, elr_el1
-    ;; mrs x1, spsr_el1
-    ;; stp x0, x1, [sp, #16 * 16]
+    mrs x0, elr_el1
+    mrs x1, spsr_el1
+    stp x0, x1, [sp, #16 * 16]
 .endm
 
 .macro int_exit
-    ;; ldp x0, x1, [sp, #16 * 16]
-    ;; msr elr_el1, x0
-    ;; msr spsr_el1, x1
+    ldp x0, x1, [sp, #16 * 16]
+    msr elr_el1, x0
+    msr spsr_el1, x1
 
     ldp  x0,  x1, [sp, #16 * 0]
     ldp  x2,  x3, [sp, #16 * 1]

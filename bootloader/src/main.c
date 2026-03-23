@@ -114,6 +114,7 @@ void main() {
 
     start_timer(1);
 
+    for (volatile u32 i = 0; ; i++);
     while (1);
     /* for (volatile u32 i = 0; i < 10000000; i++); */
 

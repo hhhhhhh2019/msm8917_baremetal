@@ -38,7 +38,8 @@ struct registers {
     u64 x29;
     u64 x30;
     u64 sp;
-    u64 elr_el1;
+    u64 elr;
+    u64 spsr;
 };
 
 typedef void (*irq_handler)(u32 irq, struct registers*);
