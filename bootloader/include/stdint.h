@@ -9,5 +9,6 @@ typedef int            i32;
 typedef unsigned int   u32;
 typedef long           i64; // надейтесь на это
 typedef unsigned long  u64;
+typedef u64 size_t;
 
 #endif // STDINT_H_

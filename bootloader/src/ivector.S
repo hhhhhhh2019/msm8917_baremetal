@@ -17,6 +17,8 @@ get_vbar:
     ret
 
 .macro int_enter
+    msr daifset, #15
+
     sub sp, sp, #16 * 17
     stp  x0,  x1, [sp, #16 * 0]
     stp  x2,  x3, [sp, #16 * 1]
@@ -63,6 +65,8 @@ get_vbar:
     ldp x28, x29, [sp, #16 * 14]
     ldr x30,      [sp, #16 * 15]
     add sp, sp, #16 * 17
+
+    msr daifclr, #15
 
     eret
 .endm

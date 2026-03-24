@@ -8,7 +8,7 @@ OBJ:=$(patsubst ./src/%,./$(BUILD)/%,$(OBJ))
 DEP=$(OBJ:.o=.d)
 
 AS_FLAGS+=
-CC_FLAGS+=-MMD -MP -mgeneral-regs-only -I./include
+CC_FLAGS+=-MMD -MP -mgeneral-regs-only -ffreestanding -I./include
 LD_FLAGS+=-gc-sections
 
 $(BUILD)/%.o: src/%.S

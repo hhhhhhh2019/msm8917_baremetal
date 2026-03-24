@@ -1,5 +1,6 @@
 #include "spmi.h"
 #include "log.h"
+#include "task.h"
 #include "utils.h"
 #include "gpio.h"
 #include "qtimer.h"
@@ -9,6 +10,8 @@
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
 void edl_reboot() {
+    asm volatile("msr daifset, #15" ::: "memory");
+
     register u64 r0 __asm__("x0") = 2181039362;
     register u64 r1 __asm__("x1") = 2;
     register u64 r2 __asm__("x2") = 0x193D100;
@@ -35,7 +38,6 @@ void edl_reboot() {
             : "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6));
     } while (r0 == 1);
 
-
     /* log(LOG_INFO, "edl_reboot(): smc done"); */
 
     pmic_reg_write(0, 8, 87, 0);
@@ -46,17 +48,25 @@ void edl_reboot() {
     pmic_reg_write(2, 8, 91, 0);
 
     // TODO: better delay
-    for (volatile int i = 0; i < 1000000; i++);
+    for (volatile int i = 0; i < 2000000; i++);
 
     pmic_reg_write(0, 8, 90, 1);
     pmic_reg_write(2, 8, 90, 1);
 
-    pmic_reg_write(0, 8, 91, 1 << 7);
-    pmic_reg_write(2, 8, 91, 1 << 7);
+    /* pmic_reg_write(0, 8, 91, 1 << 7); */
+    /* pmic_reg_write(2, 8, 91, 1 << 7); */
+
+    // наделал какую-то дичь, но теперь оно стабильно перезагружается
+    __asm__ volatile ("isb");
+    __asm__ volatile ("dsb sy");
+
+    writeu32(0x193d100, 1);
+    writeu32(0x004AB000, 0);
 
     /* log(LOG_INFO, "edl_reboot(): pmic_reset_configure done"); */
 
     writeu32(0x004AB000, 0);
+
     while (1);
 
     // судя по логам, выполнение доходит даже до сюда
@@ -69,17 +79,22 @@ u32 tick;
 void timer_handler(u32 irq, struct registers *regs) {
     tick++;
     logf(LOG_INFO, "tick: %d", tick);
-    if (tick == 10) {
+
+    /* u8* fb = (u8*)0x90001000; */
+    /* for (u32 y = 20; y < 40; y++) */
+    /*     for (u32 x = 20; x < 40; x++) { */
+    /*         u32 offset = (x + y * 720) * 3; */
+    /*         fb[offset + 0] += 100; */
+    /*   } */
+
+    if (tick == 3) {
         edl_reboot();
         while (1);
     }
 
     start_timer(1000);
 
-    if (tick % 2 == 1)
-        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
-    else
-        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
+    schedule(regs);
 }
 
 void foo();
@@ -90,6 +105,8 @@ void main() {
 
     log(LOG_INFO, "hello from main");
     logf(LOG_INFO, "vector_table: %X", &vector_table);
+
+    init_scheduler();
 
     tlmm_mode(93, GPIO_OUTPUT);
 
@@ -114,8 +131,12 @@ void main() {
 
     start_timer(1);
 
-    for (volatile u32 i = 0; ; i++);
-    while (1);
+    for (volatile u32 i = 0; i < 80; i++) {
+        for (volatile u32 i = 0; i < 200000; i++);
+        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
+        for (volatile u32 i = 0; i < 200000; i++);
+        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
+    }
     /* for (volatile u32 i = 0; i < 10000000; i++); */
 
     log(LOG_INFO, "reboot");

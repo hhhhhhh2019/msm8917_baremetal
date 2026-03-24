@@ -1,8 +1,10 @@
 #ifndef TASK_H_
 #define TASK_H_
 
-#include "stdint.h"
+#include "interrupts.h"
 
-/* void switch_task(struct task* from, struct task* to); */
+void init_scheduler();
+void schedule(struct registers* regs);
+void add_task(void (*start)(void* userdata));
 
 #endif // TASK_H_

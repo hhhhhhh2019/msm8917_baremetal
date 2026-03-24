@@ -25,5 +25,6 @@
 #define bits(n, e, s) (((n) >> (s)) & (1 << ((e) - (s) + 1)) - 1)
 
 void edl_reboot();
+void* memcpy(void* dest, const void* src, size_t n);
 
 #endif // UTILS_H_
