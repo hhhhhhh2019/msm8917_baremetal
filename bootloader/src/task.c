@@ -16,6 +16,12 @@ void schedule(struct registers* regs) {
     *regs = tasks[current_task];
 }
 
-void add_task(void (*start)(void* data)) {
-
+void add_task(void (*start)(void* userdata), void* userdata) {
+    struct registers* regs = &tasks[tasks_count++];
+    regs->x0 = (u64)userdata;
+    regs->sp = 0xa0000000 + 0x8000 * (tasks_count-1);
+    regs->x29 = regs->sp;
+    regs->x30 = (u64)start;
+    regs->elr = (u64)start;
+    regs->spsr = 0x80000005;
 }

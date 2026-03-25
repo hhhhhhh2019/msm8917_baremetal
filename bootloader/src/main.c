@@ -80,24 +80,30 @@ void timer_handler(u32 irq, struct registers *regs) {
     tick++;
     logf(LOG_INFO, "tick: %d", tick);
 
-    /* u8* fb = (u8*)0x90001000; */
-    /* for (u32 y = 20; y < 40; y++) */
-    /*     for (u32 x = 20; x < 40; x++) { */
-    /*         u32 offset = (x + y * 720) * 3; */
-    /*         fb[offset + 0] += 100; */
-    /*   } */
+    #define delay 1
 
-    if (tick == 3) {
+    if (tick == 10*1000/delay) {
         edl_reboot();
         while (1);
     }
 
-    start_timer(1000);
+    start_timer(delay);
 
     schedule(regs);
 }
 
-void foo();
+void task(void* userdata) {
+    u8* fb = (u8*)0x90001000;
+
+    for (u32 y = 0; y < 1280; y++) {
+        for (u32 x = 0; x < 720; x++) {
+            u32 offset = (x + y * 720) * 3;
+            fb[offset + 1] += 73;
+            fb[offset + 1] += 73;
+            fb[offset + 2] += 73;
+        }
+    }
+}
 
 void main() {
     clear_debug_buffer();
@@ -107,6 +113,7 @@ void main() {
     logf(LOG_INFO, "vector_table: %X", &vector_table);
 
     init_scheduler();
+    add_task(task, NULL);
 
     tlmm_mode(93, GPIO_OUTPUT);
 
