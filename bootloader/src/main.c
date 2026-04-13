@@ -1,5 +1,6 @@
 #include "spmi.h"
 #include "log.h"
+#include "stdint.h"
 #include "task.h"
 #include "utils.h"
 #include "gpio.h"
@@ -133,7 +134,7 @@ void main() {
      I or bit 7 - when it’s set to 1, IRQs are masked;
      F or bit 6 - when it’s set to 1, FIQs are masked.
      */
-    asm volatile("msr daifset, #15" ::: "memory");
+    /* asm volatile("msr daifset, #15" ::: "memory"); */
     asm volatile("msr daifclr, #15" ::: "memory");
 
     start_timer(1);
