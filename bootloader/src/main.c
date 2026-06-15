@@ -7,6 +7,7 @@
 #include "qtimer.h"
 #include "interrupts.h"
 #include "gic.h"
+#include "fb.h"
 
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
@@ -78,32 +79,33 @@ void edl_reboot() {
 u32 tick;
 
 void timer_handler(u32 irq, struct registers *regs) {
-    tick++;
-    logf(LOG_INFO, "tick: %d", tick);
+    edl_reboot();
+    /* tick++; */
+    /* /\* logf(LOG_INFO, "tick: %d", tick); *\/ */
 
-    #define delay 1
+    /* #define delay 1000 */
 
-    if (tick == 10*1000/delay) {
-        edl_reboot();
-        while (1);
-    }
+    /* if (tick == 10*1000/delay) { */
+    /*     edl_reboot(); */
+    /*     while (1); */
+    /* } */
 
-    start_timer(delay);
+    /* start_timer(delay); */
 
-    schedule(regs);
+    /* schedule(regs); */
 }
 
 void task(void* userdata) {
-    u8* fb = (u8*)0x90001000;
+    /* u8* fb = (u8*)0x90001000; */
 
-    for (u32 y = 0; y < 1280; y++) {
-        for (u32 x = 0; x < 720; x++) {
-            u32 offset = (x + y * 720) * 3;
-            fb[offset + 1] += 73;
-            fb[offset + 1] += 73;
-            fb[offset + 2] += 73;
-        }
-    }
+    /* for (u32 y = 0; y < 1280; y++) { */
+    /*     for (u32 x = 0; x < 720; x++) { */
+    /*         u32 offset = (x + y * 720) * 3; */
+    /*         fb[offset + 1] += 73; */
+    /*         fb[offset + 1] += 73; */
+    /*         fb[offset + 2] += 73; */
+    /*     } */
+    /* } */
 }
 
 void main() {
@@ -115,6 +117,9 @@ void main() {
 
     init_scheduler();
     add_task(task, NULL);
+
+    fb_init();
+    fb_init_addres((void*)0x90001000);
 
     tlmm_mode(93, GPIO_OUTPUT);
 
@@ -137,15 +142,19 @@ void main() {
     /* asm volatile("msr daifset, #15" ::: "memory"); */
     asm volatile("msr daifclr, #15" ::: "memory");
 
-    start_timer(1);
+    start_timer(5000);
 
-    for (volatile u32 i = 0; i < 80; i++) {
-        for (volatile u32 i = 0; i < 200000; i++);
-        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE);
-        for (volatile u32 i = 0; i < 200000; i++);
-        tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE);
-    }
+    /* for (volatile u32 i = 0; i < 80; i++) { */
+    /*     for (volatile u32 i = 0; i < 200000; i++); */
+    /*     tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE); */
+    /*     for (volatile u32 i = 0; i < 200000; i++); */
+    /*     tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE); */
+    /* } */
     /* for (volatile u32 i = 0; i < 10000000; i++); */
+    while (1) {
+        fb_put_char('!');
+        for (volatile u32 i = 0; i < 10000; i++);
+    }
 
     log(LOG_INFO, "reboot");
 

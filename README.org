@@ -24,6 +24,7 @@ cd bootloader
 make
 fastboot boot build/boot.img
 edl peek 0x90000000 0x2000 dump
+edl reset
  #+END_SRC
 
  в файле dump будут лежать логи загрузчика
