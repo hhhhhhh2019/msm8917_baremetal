@@ -45,13 +45,3 @@ run_main:
 hang:
     wfe
     b hang
-
-
-.global foo
-.type foo@function
-foo:
-    mov x0, xzr
-    mov x1, 1
-loop:
-    add x0, x0, x1
-    b loop

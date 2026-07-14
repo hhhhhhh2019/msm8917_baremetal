@@ -16,6 +16,8 @@ tlb_table_t tlb_table_kernel = {0};
 #define MMIO_FLAGS         (PTE_VALID | PTE_BLOCK | (ATTR_INDEX_DEVICE << 2) | PTE_AF)
 #define RAM_FLAGS          (PTE_VALID | PTE_BLOCK | (ATTR_INDEX_NORMAL << 2) | PTE_AF | PTE_INNER_SH)
 
+void loop();
+
 void mmu_init() {
     tlb_table_kernel[0] = 0x00000000ULL | MMIO_FLAGS;
     tlb_table_kernel[1] = 0x20000000ULL | MMIO_FLAGS;
@@ -64,10 +66,12 @@ void mmu_init() {
     fb_put_char('4');
 
     asm volatile(
-        "TLBI VMALLE1IS\n"
-        "dsb ish\n"
-        "isb"
-    ); // reset cache
+        "ic ialluis     \n"
+        "dsb sy         \n"
+        "tlbi vmalle1is \n"
+        "dsb sy         \n"
+        "isb            \n"
+    );
 
     fb_put_char('5');
 
@@ -93,4 +97,15 @@ void mmu_init() {
         fb_put_char('a');
         for (volatile u32 i = 0; i < 1000; i++);
     }
+
+    while (1) {
+        fb_put_char('1');
+        loop();
+        fb_put_char('3');
+    }
+}
+
+void loop() {
+    fb_put_char('2');
+    for (volatile u32 i = 0; i < 10000; i++);
 }
