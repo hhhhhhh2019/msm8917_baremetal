@@ -1,4 +1,6 @@
-from string import printable
+import string
+
+printable = string.printable.replace("\n", "").replace(chr(0xd), "")
 
 # Базовый паттерн букв (взят из стандартного VGA 8x16)
 # Вы можете дополнить этот словарь любыми символами
@@ -142,9 +144,9 @@ for char,bitmap in enumerate(font_mono):
         line = []
         for bit in range(8):
             if row & (0x80 >> bit):
-                line.append("0x00,0x00,0x00,")
-            else:
                 line.append("0xff,0xff,0xff,")
+            else:
+                line.append("0x00,0x00,0x00,")
         print("    " + " ".join(line))
 
     print("    },")
