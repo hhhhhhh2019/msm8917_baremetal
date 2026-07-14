@@ -12,10 +12,10 @@ tlb_table_t tlb_table_kernel = {0};
 #define ATTR_INDEX_DEVICE  0
 #define ATTR_INDEX_NORMAL  1
 
-// Сборка масок для дескрипторов
 #define MMIO_FLAGS         (PTE_VALID | PTE_BLOCK | (ATTR_INDEX_DEVICE << 2) | PTE_AF)
 #define RAM_FLAGS          (PTE_VALID | PTE_BLOCK | (ATTR_INDEX_NORMAL << 2) | PTE_AF | PTE_INNER_SH)
 
+__attribute__((noinline))
 void loop();
 
 void mmu_init() {
@@ -24,12 +24,10 @@ void mmu_init() {
     tlb_table_kernel[2] = 0x40000000ULL | MMIO_FLAGS;
     tlb_table_kernel[3] = 0x60000000ULL | MMIO_FLAGS;
 
-    // 3. Мапим следующие 2 ГБ пространства как Normal Memory (ОЗУ телефона)
-    // Именно здесь по физическому адресу 0x80000000+ лежит твой текущий код
     tlb_table_kernel[4] = 0x80000000ULL | RAM_FLAGS;
     tlb_table_kernel[5] = 0xA0000000ULL | RAM_FLAGS;
     tlb_table_kernel[6] = 0xC0000000ULL | RAM_FLAGS;
-    tlb_table_kernel[7] = 0xE0000000ULL | RAM_FLAGS;
+    tlb_table_kernel[7] = 0x80000000ULL | RAM_FLAGS;
 
     asm volatile("dsb sy" ::: "memory");
 
@@ -85,6 +83,9 @@ void mmu_init() {
              (0 <<  2) | // Cache
              (0 << 12);  // ICache
 
+    sctrl &= ~(1 << 28);
+    sctrl &= ~(1 << 29);
+
     fb_put_char('7');
 
     asm volatile("msr SCTLR_EL1, %0\n"
@@ -93,19 +94,34 @@ void mmu_init() {
 
     fb_put_char('8');
 
+    u64 current_sp;
+    asm volatile("mov %0, sp" : "=r"(current_sp));
+
+    asm volatile("dc ivac, %0" :: "r"(current_sp));
+    asm volatile("dc ivac, %0" :: "r"(current_sp + 64));
+    asm volatile("dc ivac, %0" :: "r"(current_sp - 64));
+
+    asm volatile("dsb sy\n"
+                 "isb");
+
+    loop();
+
     for (int a = 0; a < 10; a++) {
         fb_put_char('a');
-        for (volatile u32 i = 0; i < 1000; i++);
-    }
-
-    while (1) {
-        fb_put_char('1');
-        loop();
-        fb_put_char('3');
+        for (volatile u32 i = 0; i < 1000000; i++);
     }
 }
 
+__attribute__((noinline))
 void loop() {
-    fb_put_char('2');
-    for (volatile u32 i = 0; i < 10000; i++);
+    u8* fb = (u8*)(0x90001000ULL - 0x80000000ULL + 0xE0000000ULL);
+
+    for (u32 x = 0; x < 100; x++) {
+        for (u32 y = 0; y < 100; y++) {
+            u32 offset = (x + y * 720) * 3;
+            fb[offset + 0] = 100;
+            fb[offset + 1] = 200;
+            fb[offset + 2] = 250;
+        }
+    }
 }

@@ -2370,6 +2370,10 @@ void fb_put_char(u8 ch) {
     }
 }
 
+void fb_put_str(u8* s) {
+    while (*s) fb_put_char(*(s++));
+}
+
 void fb_flush() {
     for (u64 i = 0; i < fb_width * fb_height * 3; i += 64) {
         asm volatile("dc cvac, %0" :: "r"(fb + i));
