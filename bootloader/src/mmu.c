@@ -29,11 +29,13 @@ void loop() {
     }
 }
 
+void main();
+
 void mmu_init() {
     fb_put_char('1');
 
-    u8 attr0 = (0b0000 << 0) | (0b0000 << 4); // Device memory, Device-nGnRnE memory
-    u8 attr1 = (0b0100 << 0) | (0b0100 << 4); // Normal Memory, Outer Non-Cacheable, Normal memory, Inner Non-Cacheable
+    u8 attr0 = (0b0000 << 0) | (0b0000 << 4); // Device memory | Device-nGnRnE memory
+    u8 attr1 = (0b0111 << 0) | (0b0111 << 4); // Normal Memory, Outer Write-back transient | Normal Memory, Inner Write-back transient
     asm volatile("msr MAIR_EL1, %0" :: "r"(attr0 | (attr1 << 8)));
 
     fb_put_char('2');
@@ -46,7 +48,7 @@ void mmu_init() {
     tlb_kernel_table[4] = 0x80000000 | RAM_FLAGS;
     tlb_kernel_table[5] = 0xa0000000 | RAM_FLAGS;
     tlb_kernel_table[6] = 0xc0000000 | RAM_FLAGS;
-    tlb_kernel_table[7] = 0x80000000 | RAM_FLAGS;
+    tlb_kernel_table[7] = 0x90000000 | RAM_FLAGS;
 
     asm volatile("msr TTBR0_EL1, %0" :: "r"(tlb_kernel_table));
     asm volatile("msr TTBR1_EL1, %0" :: "r"(tlb_kernel_table));
@@ -90,7 +92,13 @@ void mmu_init() {
 
     asm volatile("isb \ndsb sy");
 
+    fb_put_char('f');
+
     loop();
 
-    fb_put_char('f');
+    fb_put_char('U');
+
+    fb_flush();
+
+    main();
 }

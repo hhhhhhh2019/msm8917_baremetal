@@ -77,7 +77,18 @@ void edl_reboot() {
     /* log(LOG_INFO, "edl_reboot(): MPM2_MPM_PS_HOLD done"); */
 }
 
+u8 flag = 0;
+
 void main() {
+    if (flag) {
+        while (1) {
+            fb_put_char('b');
+            for (volatile u32 i = 0; i < 1000; i++);
+        }
+    }
+
+    flag = 1;
+
     fb_init();
     fb_init_addres((void*)0x90001000);
 
@@ -99,11 +110,6 @@ void main() {
      */
     /* asm volatile("msr daifset, #15" ::: "memory"); */
     /* asm volatile("msr daifclr, #15" ::: "memory"); */
-
-    while (1) {
-        fb_put_char('b');
-        for (volatile u32 i = 0; i < 1000; i++);
-    }
 
     log(LOG_INFO, "reboot");
 
