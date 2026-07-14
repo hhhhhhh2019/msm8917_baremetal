@@ -8,6 +8,7 @@
 #include "interrupts.h"
 #include "gic.h"
 #include "fb.h"
+#include "mmu.h"
 
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
@@ -109,29 +110,26 @@ void task(void* userdata) {
 }
 
 void main() {
-    clear_debug_buffer();
     tick = 0;
-
-    log(LOG_INFO, "hello from main");
-    logf(LOG_INFO, "vector_table: %X", &vector_table);
-
-    init_scheduler();
-    add_task(task, NULL);
 
     fb_init();
     fb_init_addres((void*)0x90001000);
 
-    tlmm_mode(93, GPIO_OUTPUT);
+    u64 current_el;
+    asm("mrs %0, CurrentEL" : "=r"(current_el));
+    current_el = (current_el >> 2) & 0x3;
 
-    set_vector_table(&vector_table);
-    gic_init();
+    fb_put_char('0' + current_el);
 
-    // если включать все, то помимо таймера сыпет еще кучу прерываний
-    /* for (int i = 0; i < 128; i++) */
-    /*     gic_unmask_interrupt(i); */
-    gic_unmask_interrupt(19);
+    for (u32 a = 0; a < 5; a++) {
+        for (volatile u32 i = 0; i < 1000; i++);
+        fb_put_char('!');
+    }
 
-    set_irq_handler(289, &timer_handler);
+    mmu_init();
+
+    /* set_vector_table(&vector_table); */
+    /* gic_init(); */
 
     /*
      D or bit 9 - when it’s set to 1, debug exceptions are masked;
@@ -140,20 +138,11 @@ void main() {
      F or bit 6 - when it’s set to 1, FIQs are masked.
      */
     /* asm volatile("msr daifset, #15" ::: "memory"); */
-    asm volatile("msr daifclr, #15" ::: "memory");
+    /* asm volatile("msr daifclr, #15" ::: "memory"); */
 
-    start_timer(5000);
-
-    /* for (volatile u32 i = 0; i < 80; i++) { */
-    /*     for (volatile u32 i = 0; i < 200000; i++); */
-    /*     tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_ENABLE); */
-    /*     for (volatile u32 i = 0; i < 200000; i++); */
-    /*     tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_DISABLE); */
-    /* } */
-    /* for (volatile u32 i = 0; i < 10000000; i++); */
     while (1) {
-        fb_put_char('!');
-        for (volatile u32 i = 0; i < 10000; i++);
+        fb_put_char('b');
+        for (volatile u32 i = 0; i < 1000; i++);
     }
 
     log(LOG_INFO, "reboot");

@@ -18,9 +18,10 @@ SECTIONS {
 
     __data_end = .;
 
-    .bss : {
+    .bss : ALIGN(16) {
         _bss_start = .;
         *(.bss)
+        . = ALIGN(16);
         _bss_end = .;
     }
 

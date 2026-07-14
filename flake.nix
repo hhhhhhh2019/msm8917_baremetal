@@ -7,46 +7,46 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
+  flake-utils.lib.eachDefaultSystem (
+    system: let
+      pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
 
-	bootloader = pkgs.stdenv.mkDerivation {
-	  pname = "bootloader";
-	  version = "0.1.0";
+      bootloader = pkgs.stdenv.mkDerivation {
+        pname = "bootloader";
+        version = "0.1.0";
 
-	  src = pkgs.lib.fileset.toSource { root = ./.; fileset = pkgs.lib.fileset.unions [ ./bootloader ./Makefile.defaults ./pmos.dtb ]; };
+        src = pkgs.lib.fileset.toSource { root = ./.; fileset = pkgs.lib.fileset.unions [ ./bootloader ./Makefile.defaults ./pmos.dtb ]; };
 
-	  nativeBuildInputs = with pkgs; [
-            gnumake
-            pkgsCross.aarch64-embedded.buildPackages.gcc
-            pkgsCross.aarch64-embedded.buildPackages.binutils
-            dtc
-            android-tools
-	  ];
+        nativeBuildInputs = with pkgs; [
+          gnumake
+          pkgsCross.aarch64-embedded.buildPackages.gcc
+          pkgsCross.aarch64-embedded.buildPackages.binutils
+          dtc
+          android-tools
+        ];
 
-	  buildPhase = ''
-	    cd bootloader
-	    make
-	  '';
+        buildPhase = ''
+          cd bootloader
+          make
+        '';
 
-	  installPhase = ''
-	    mkdir -p $out
-            cp build/boot.img $out/
-            cp build/bootloader.elf.map $out/
-	  '';
-	};
-      in {
- 	packages = {
-	  inherit bootloader;
-	};
+        installPhase = ''
+          mkdir -p $out
+          cp build/boot.img $out/
+          cp build/bootloader.elf.map $out/
+        '';
+      };
+    in {
+      packages = {
+        inherit bootloader;
+      };
 
-        devShell = pkgs.mkShell {
-	  inputsFrom = [ bootloader ];
-          packages = with pkgs; [
-            edl
-          ];
-        };
-      }
-    );
-}
+      devShell = pkgs.mkShell {
+        inputsFrom = [ bootloader ];
+        packages = with pkgs; [
+          edl
+          clang-tools
+        ];
+      };
+    });
+  }
