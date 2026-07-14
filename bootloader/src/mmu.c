@@ -15,6 +15,20 @@ u64 tlb_kernel_table[8192] __attribute__((aligned(65536)));
 #define MMIO_FLAGS (0b01 << 0) | (1 << 10) | (0 << 2)
 #define RAM_FLAGS  (0b01 << 0) | (1 << 10) | (1 << 2)
 
+__attribute__((noinline))
+void loop() {
+    u8* fb = (u8*)(0x90001000ULL - 0x80000000ULL + 0xE0000000ULL);
+
+    for (u32 x = 0; x < 100; x++) {
+        for (u32 y = 0; y < 100; y++) {
+            u32 offset = (x + y * 720) * 3;
+            fb[offset + 0] = 100;
+            fb[offset + 1] = 200;
+            fb[offset + 2] = 250;
+        }
+    }
+}
+
 void mmu_init() {
     fb_put_char('1');
 
@@ -32,7 +46,7 @@ void mmu_init() {
     tlb_kernel_table[4] = 0x80000000 | RAM_FLAGS;
     tlb_kernel_table[5] = 0xa0000000 | RAM_FLAGS;
     tlb_kernel_table[6] = 0xc0000000 | RAM_FLAGS;
-    tlb_kernel_table[7] = 0xe0000000 | RAM_FLAGS;
+    tlb_kernel_table[7] = 0x80000000 | RAM_FLAGS;
 
     asm volatile("msr TTBR0_EL1, %0" :: "r"(tlb_kernel_table));
     asm volatile("msr TTBR1_EL1, %0" :: "r"(tlb_kernel_table));
@@ -56,17 +70,27 @@ void mmu_init() {
 
     fb_put_char('4');
 
-    asm volatile("isb\ndsb sy");
+    asm volatile(
+        "ic ialluis     \n"
+        "dsb sy         \n"
+        "tlbi vmalle1is \n"
+        "dsb sy         \n"
+        "isb            \n"
+    );
+
+    fb_put_char('5');
 
     // enable MMU
     u64 scr;
     asm volatile("mrs %0, SCTLR_EL1" : "=r"(scr));
     scr |= (1 <<  0) | // mmu
-           (0 <<  2) | // data cache
-           (0 << 12);  // instruction cache
+           (1 <<  2) | // data cache
+           (1 << 12);  // instruction cache
     asm volatile("msr SCTLR_EL1, %0" :: "r"(scr));
 
     asm volatile("isb \ndsb sy");
+
+    loop();
 
     fb_put_char('f');
 }
