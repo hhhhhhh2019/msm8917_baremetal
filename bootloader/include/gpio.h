@@ -6,6 +6,8 @@
 #define TLMM_BASE 0x1000000
 #define GPIO_CTL(n) (TLMM_BASE + (n) * 0x1000 + 0)
 #define GPIO_IO(n) (TLMM_BASE + (n) * 0x1000 + 4)
+#define GPIO_INTR_CFG(n) (TLMM_BASE + (n) * 0x1000 + 8)
+#define GPIO_INTR_STATUS(n) (TLMM_BASE + (n) * 0x1000 + 12)
 
 enum GPIOFunc {
     GPIO_FUNC_GPIO = 0,
@@ -30,17 +32,18 @@ enum GPIODStr {
 };
 
 enum GPIODir {
-    GPIO_INPUT  = 1,
-    GPIO_OUTPUT = 2,
+    GPIO_INPUT  = 0,
+    GPIO_OUTPUT = 1,
 };
 
 enum GPIOStatus {
-    GPIO_ENABLE  = 0,
-    GPIO_DISABLE = 1,
+    GPIO_LOW  = 0,
+    GPIO_HIGH = 1,
 };
 
 void tlmm_cfg(u16 port, enum GPIOPull pull, enum GPIOFunc func,
-              enum GPIODStr drv, enum GPIOStatus oe);
-void tlmm_mode(u16 port, enum GPIODir mode);
+              enum GPIODStr drv, enum GPIODir oe);
+void tlmm_set_mode(u16 port, enum GPIOStatus mode);
+u32 tlmm_get_mode(u16 port);
 
 #endif // GPIO_H_

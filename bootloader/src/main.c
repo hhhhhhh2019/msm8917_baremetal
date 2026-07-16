@@ -91,10 +91,15 @@ void edl_reboot() {
 u64 tlb_kernel_table[8192] __attribute__((aligned(65536)));
 
 void timer_handler(u32 irq, struct registers *regs) {
-    fb_put_char('t');
+    start_timer(100);
+
+    u32 button_mode = 1 - tlmm_get_mode(91); // когда кнопка нажата, она подцепляется к земле. тоесть get_mode вернет 0
+    fb_put_char('0' + button_mode);
+    tlmm_set_mode(93, button_mode);
+
     fb_flush();
 
-    start_timer(100);
+    /* edl_reboot(); */
 }
 
 void main() {
@@ -176,6 +181,10 @@ void main() {
 
     fb_init();
     fb_init_addres((void*)0x90001000);
+
+    // enable buttons
+    tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_OUTPUT);
+    tlmm_cfg(91, GPIO_PULL_UP, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_INPUT);
 
     start_timer(1);
 
