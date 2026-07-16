@@ -105,27 +105,23 @@ serror_handler:
     int_exit
 
 unimplemented_sync_handler:
-    mov x0, xzr
-    ldr x1, =unimplemented_sync
-    bl log
+    mov x0, 'S'
+    bl fb_put_char
     b edl_reboot
 
 unimplemented_irq_handler:
-    mov x0, xzr
-    ldr x1, =unimplemented_irq
-    bl log
+    mov x0, 'I'
+    bl fb_put_char
     b edl_reboot
 
 unimplemented_fiq_handler:
-    mov x0, xzr
-    ldr x1, =unimplemented_fiq
-    bl log
+    mov x0, 'Q'
+    bl fb_put_char
     b edl_reboot
 
 unimplemented_serror_handler:
-    mov x0, xzr
-    ldr x1, =unimplemented_serror
-    bl log
+    mov x0, 'E'
+    bl fb_put_char
     b edl_reboot
 
 .balign 2048
