@@ -40,17 +40,13 @@ void edl_reboot() {
             : "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6));
     } while (r0 == 1);
 
-    /* log(LOG_INFO, "edl_reboot(): smc done"); */
-
     pmic_reg_write(0, 8, 87, 0);
-
-    /* log(LOG_INFO, "edl_reboot(): PMIC_WD_RESET_S2_CTL2 done"); */
 
     pmic_reg_write(0, 8, 91, 0);
     pmic_reg_write(2, 8, 91, 0);
 
-    // TODO: better delay
-    for (volatile int i = 0; i < 2000000; i++);
+    /* // TODO: better delay */
+    /* for (volatile int i = 0; i < 2000000; i++); */
 
     pmic_reg_write(0, 8, 90, 1);
     pmic_reg_write(2, 8, 90, 1);
@@ -65,15 +61,12 @@ void edl_reboot() {
     writeu32(0x193d100, 1);
     writeu32(0x004AB000, 0);
 
-    /* log(LOG_INFO, "edl_reboot(): pmic_reset_configure done"); */
-
     writeu32(0x004AB000, 0);
 
-    while (1);
+    __asm__ volatile ("isb");
+    __asm__ volatile ("dsb sy");
 
-    // судя по логам, выполнение доходит даже до сюда
-
-    /* log(LOG_INFO, "edl_reboot(): MPM2_MPM_PS_HOLD done"); */
+    while (1) { asm volatile("wfi"); };
 }
 
 #define MMIO_FLAGS (0b01 << 0) | (1 << 10) | (0 << 2)
@@ -167,8 +160,8 @@ void main() {
     set_vector_table(&vector_table);
     gic_init();
 
-    gic_unmask_interrupt(19);
-    set_irq_handler(289, &timer_handler);
+    gic_unmask_interrupt(QTMR_IRQ);
+    set_irq_handler(QTMR_IRQ, &timer_handler);
 
     /*
      D or bit 9 - when it’s set to 1, debug exceptions are masked;
@@ -176,21 +169,10 @@ void main() {
      I or bit 7 - when it’s set to 1, IRQs are masked;
      F or bit 6 - when it’s set to 1, FIQs are masked.
      */
-    /* asm volatile("msr daifset, #15" ::: "memory"); */
+    asm volatile("msr daifset, #15" ::: "memory");
     asm volatile("msr daifclr, #15" ::: "memory");
-
-    fb_init();
-    fb_init_addres((void*)0x90001000);
-
-    // enable buttons
-    tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_OUTPUT);
-    tlmm_cfg(91, GPIO_PULL_UP, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_INPUT);
 
     start_timer(1);
 
     while (1) { asm volatile("wfi"); }
-
-    log(LOG_INFO, "reboot");
-
-    edl_reboot();
 }

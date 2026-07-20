@@ -1,7 +1,7 @@
 #ifndef GIC_H_
 #define GIC_H_
 
-// https://developer.arm.com/documentation/ddi0500/j/Generic-Interrupt-Controller-CPU-Interface/GIC-programmers-model/CPU-interface-register-summary?lang=en
+// https://developer.arm.com/documentation/ihi0048/latest/
 
 #define GICD_BASE 0xb000000
 #define GICC_BASE 0xb002000
@@ -22,17 +22,20 @@
 #define GICC_IIDR   (GICC_BASE + 0x00FC)
 #define GICC_DIR    (GICC_BASE + 0x1000)
 
-#define GICD_CTLR        (GICD_BASE + 0x000)
-#define GICD_CTR         (GICD_BASE + 0x004)
-#define GICD_ENABLE_SET  (GICD_BASE + 0x100)
-#define GICD_ENABLE_CLR  (GICD_BASE + 0x180)
-#define GICD_PENDING_SET (GICD_BASE + 0x200)
-#define GICD_PENDING_CLR (GICD_BASE + 0x280)
-#define GICD_ACTIVE      (GICD_BASE + 0x300)
-#define GICD_PRIORITY    (GICD_BASE + 0x400)
-#define GICD_TARGET      (GICD_BASE + 0x800)
-#define GICD_CONFIG      (GICD_BASE + 0xc00)
-#define GICD_SOFTINT     (GICD_BASE + 0xf00)
+#define GICD_CTLR           (GICD_BASE + 0x000)
+#define GICD_TYPER          (GICD_BASE + 0x004)
+#define GICD_IIDR           (GICD_BASE + 0x008)
+#define GICD_GROUPR(n)      (GICD_BASE + 0x080 + (n) * 4)
+#define GICD_ENABLE_SET(n)  (GICD_BASE + 0x100 + (n) * 4)
+#define GICD_ENABLE_CLR(n)  (GICD_BASE + 0x180 + (n) * 4)
+#define GICD_PENDING_SET(n) (GICD_BASE + 0x200 + (n) * 4)
+#define GICD_PENDING_CLR(n) (GICD_BASE + 0x280 + (n) * 4)
+#define GICD_ACTIVE_SET(n)  (GICD_BASE + 0x300 + (n) * 4)
+#define GICD_ACTIVE_CLR(n)  (GICD_BASE + 0x380 + (n) * 4)
+#define GICD_PRIORITY(n)    (GICD_BASE + 0x400 + (n) * 4)
+#define GICD_TARGET(n)      (GICD_BASE + 0x800 + (n) * 4)
+#define GICD_CONFIG(n)      (GICD_BASE + 0xc00 + (n) * 4)
+#define GICD_SOFTINT(n)     (GICD_BASE + 0xf00 + (n) * 4)
 
 /* #define GIC_PPI_START 16 */
 /* #define GIC_SPI_START 32 */

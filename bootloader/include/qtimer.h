@@ -18,6 +18,8 @@
 #define QTMR_TIMER_CTRL_ENABLE   (1 << 0)
 #define QTMR_TIMER_CTRL_INT_MASK (1 << 1)
 
+#define QTMR_IRQ 289
+
 void qtimer_enable();
 void qtimer_disable();
 void start_timer(u64 ms);
