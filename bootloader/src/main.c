@@ -84,15 +84,19 @@ void edl_reboot() {
 u64 tlb_kernel_table[8192] __attribute__((aligned(65536)));
 
 void timer_handler(u32 irq, struct registers *regs) {
-    start_timer(100);
+    edl_reboot();
+}
 
-    u32 button_mode = 1 - tlmm_get_mode(91); // когда кнопка нажата, она подцепляется к земле. тоесть get_mode вернет 0
-    fb_put_char('0' + button_mode);
-    tlmm_set_mode(93, button_mode);
+void tlmm_handler(u32 irq, struct registers *regs) {
+    tlmm_set_status(91, 0);
+
+    if (tlmm_get_mode(91) == 1) {
+        tlmm_set_mode(93, GPIO_LOW);
+    } else {
+        tlmm_set_mode(93, GPIO_HIGH);
+    }
 
     fb_flush();
-
-    /* edl_reboot(); */
 }
 
 void main() {
@@ -157,11 +161,23 @@ void main() {
         "isb            \n"
     );
 
+    fb_init();
+    fb_init_addres((void*)0x90001000);
+
     set_vector_table(&vector_table);
     gic_init();
 
+    tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_OUTPUT);
+    tlmm_set_mode(93, GPIO_LOW);
+
+    tlmm_cfg(91, GPIO_PULL_UP, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_INPUT);
+    tlmm_int_cfg(91, true, GPIO_ACTIVE_LOW, GPIO_DETECT_DEDGE, true, 4);
+
     gic_unmask_interrupt(QTMR_IRQ);
     set_irq_handler(QTMR_IRQ, &timer_handler);
+
+    gic_unmask_interrupt(240);
+    set_irq_handler(240, &tlmm_handler);
 
     /*
      D or bit 9 - when it’s set to 1, debug exceptions are masked;
@@ -172,7 +188,7 @@ void main() {
     asm volatile("msr daifset, #15" ::: "memory");
     asm volatile("msr daifclr, #15" ::: "memory");
 
-    start_timer(1);
+    start_timer(10000);
 
     while (1) { asm volatile("wfi"); }
 }

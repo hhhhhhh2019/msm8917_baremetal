@@ -41,9 +41,25 @@ enum GPIOStatus {
     GPIO_HIGH = 1,
 };
 
+enum GPIOIntMode {
+    GPIO_ACTIVE_LOW  = 0,
+    GPIO_ACTIVE_HIGH = 1,
+};
+
+enum GPIODetectionControl {
+    GPIO_DETECT_LEVEL = 0, // пока +
+    GPIO_DETECT_PEDGE = 1, // - -> +
+    GPIO_DETECT_NEDGE = 2, // + -> -
+    GPIO_DETECT_DEDGE = 3, // dual edge
+};
+
 void tlmm_cfg(u16 port, enum GPIOPull pull, enum GPIOFunc func,
               enum GPIODStr drv, enum GPIODir oe);
 void tlmm_set_mode(u16 port, enum GPIOStatus mode);
 u32 tlmm_get_mode(u16 port);
+void tlmm_int_cfg(u16 port, bool enable, enum GPIOIntMode active,
+                  enum GPIODetectionControl det, bool keep, u8 cpuid);
+u32 tlmm_get_status(u16 port);
+void tlmm_set_status(u16 port, u32 status);
 
 #endif // GPIO_H_

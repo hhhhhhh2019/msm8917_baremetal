@@ -2362,6 +2362,17 @@ void fb_draw_char(u32 x, u32 y, u8 ch) {
 }
 
 void fb_put_char(u8 ch) {
+    if (ch == '\n') {
+        fb_cursor_y++;
+        fb_cursor_x = 0;
+        return;
+    }
+
+    /* if (ch == '\r') { */
+    /*     fb_cursor_x = 0; */
+    /*     return; */
+    /* } */
+
     fb_blit(fb_cursor_x++ * char_width, fb_cursor_y * char_height, char_width, char_height, char_bitmaps[ch]);
 
     if (fb_cursor_x >= fb_width / char_width) {

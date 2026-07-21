@@ -2,6 +2,7 @@
 #include "gic.h"
 #include "log.h"
 #include "utils.h"
+#include "fb.h"
 
 static irq_handler irq_handlers[512] = {0};
 
@@ -13,6 +14,13 @@ void int_sync_handler(u64 esr, u64 elr, u64 spsr, u64 far) {
 void int_irq_handler(struct registers* regs) {
     u32 iar = readu32(GICC_IAR);
     u32 irq = iar & 0x3ff;
+
+    fb_put_char(irq / 100 % 10 + '0');
+    fb_put_char(irq / 10 % 10 + '0');
+    fb_put_char(irq % 10 + '0');
+    fb_put_char('\n');
+    fb_flush();
+
     /* logf(LOG_INFO, "irq: %d, iar: %x", irq, iar); */
 
     /* logf(LOG_INFO, "x0: %X", regs->x0); */
