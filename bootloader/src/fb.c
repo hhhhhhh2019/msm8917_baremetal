@@ -1,5 +1,4 @@
-#include "utils.h"
-#include "log.h"
+#include "stdint.h"
 
 u8* fb;
 u32 fb_width;
@@ -2381,7 +2380,7 @@ void fb_put_char(u8 ch) {
     }
 }
 
-void fb_put_str(u8* s) {
+void fb_put_str(char* s) {
     while (*s) fb_put_char(*(s++));
 }
 

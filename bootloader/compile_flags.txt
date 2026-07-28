@@ -2,3 +2,4 @@
 -ffreestanding
 -I
 ./include
+-std=gnu23
