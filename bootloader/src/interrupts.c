@@ -15,11 +15,11 @@ void int_irq_handler(struct registers* regs) {
     u32 iar = readu32(GICC_IAR);
     u32 irq = iar & 0x3ff;
 
-    fb_put_char(irq / 100 % 10 + '0');
-    fb_put_char(irq / 10 % 10 + '0');
-    fb_put_char(irq % 10 + '0');
-    fb_put_char('\n');
-    fb_flush();
+    /* fb_put_char(irq / 100 % 10 + '0'); */
+    /* fb_put_char(irq / 10 % 10 + '0'); */
+    /* fb_put_char(irq % 10 + '0'); */
+    /* fb_put_char('\n'); */
+    /* fb_flush(); */
 
     /* logf(LOG_INFO, "irq: %d, iar: %x", irq, iar); */
 

@@ -141,9 +141,40 @@ i32 pmic_arb_read(u8 sid, u16 addr, u8 len, u8* data) {
     return 0;
 }
 
-/* void pmic_arb_write() { */
+i32 pmic_arb_write(u8 sid, u16 addr, u8 len, u8* data) {
+    u8 ppid = (addr >> 8) & 0xff;
+    u8 offset = addr & 0xff;
 
-/* } */
+    i32 apid = channels[CHNL_IDX(sid, ppid)];
+
+    if (apid == -1)
+        return -1;
+
+    u32 cmd = (PMIC_ARB_OP_EXT_WRITEL << PMIC_ARB_CMD_OPCODE_SHIFT) |
+              (0 << PMIC_ARB_CMD_PRIORITY_SHIFT) | // TODO
+              (offset << PMIC_ARB_CMD_ADDR_OFFSET_SHIFT) |
+              ((len - 1) << PMIC_ARB_CMD_BYTE_CNT_SHIFT);
+
+    writeu32(PMIC_ARB_CHNLn_CMD(apid), cmd);
+
+    volatile u32 val;
+    volatile u32 timeout = 1000000;
+    do {
+        val = readu32(PMIC_ARB_CHNLn_STATUS(apid));
+        timeout--;
+    } while (timeout > 0 && !(val & PMIC_ARB_STATUS_DONE));
+
+    if (timeout == 0)
+        return -2;
+
+    u32 error = val ^ PMIC_ARB_STATUS_DONE;
+
+    if (error) {
+        return error;
+    }
+
+    return 0;
+}
 
 void pmic_reg_write(u8 slaveid, u8 addr, u8 offset, u8 val) {
     pmic_write_cmd(slaveid, addr, offset, &val, 1);
@@ -166,8 +197,8 @@ void pmic_write_cmd(u8 slaveid, u8 addr, u8 offset, u8 *buf, u8 size) {
     writeu32(
              SPMI_CHNLS + channel_id * 0x8000 + PMIC_ARB_CMD,
              (PMIC_ARB_OP_EXT_WRITEL << PMIC_ARB_CMD_OPCODE_SHIFT) |
-             (slaveid << PMIC_ARB_CMD_SLAVE_ID_SHIFT) |
-             (addr << PMIC_ARB_CMD_ADDR_SHIFT) |
+             /* (slaveid << PMIC_ARB_CMD_SLAVE_ID_SHIFT) | */
+             /* (addr << PMIC_ARB_CMD_ADDR_SHIFT) | */
              (offset << PMIC_ARB_CMD_ADDR_OFFSET_SHIFT) |
              ((size - 1) << PMIC_ARB_CMD_BYTE_CNT_SHIFT) // idk why -1
     );

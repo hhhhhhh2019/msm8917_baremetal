@@ -71,29 +71,79 @@ void edl_reboot() {
 
 void fb_put_hex(u64 num, u32 chars);
 
+void timer_handler(u32 irq, struct registers *regs) {
+    fb_put_char('t');
+    start_timer(1000);
+}
+
+void spmi_handler(u32 irq, struct registers *regs) {
+    fb_put_char('i');
+
+    u32 irq_sts = readu32(PMIC_ARB_IRQ_STATUS(0x2f));
+
+    fb_put_hex(irq_sts, 9);
+
+    /* pmic_arb_write(0, 0x815, 1, (u8[]){ 0x03 }); */
+    /* asm volatile("dsb sy\nisb" ::: "memory"); */
+
+    writeu32(PMIC_ARB_IRQ_CLEAR(0x2f), 1);
+
+    asm volatile("dsb sy\nisb" ::: "memory");
+}
+
 void main() {
     fb_init();
     fb_init_addres((void*)0x90001000);
+
+    set_vector_table(&vector_table);
+    gic_init();
+
+    /* gic_unmask_interrupt(240); */
+    /* set_irq_handler(240, &tlmm_handler); */
+
+    gic_unmask_interrupt(SPMI_IRQ);
+    set_irq_handler(SPMI_IRQ, &spmi_handler);
+
+    gic_unmask_interrupt(QTMR_IRQ);
+    set_irq_handler(QTMR_IRQ, &timer_handler);
 
     tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_OUTPUT);
     tlmm_set_mode(93, GPIO_LOW);
 
     pmic_arb_init();
 
-    u32 status = 0;
-    pmic_arb_read(0, 0x800, 1, (u8*)&status);
-    fb_put_hex(status, 9);
+    /* // 1. Устанавливаем срабатывание по фронту (Edge) для обеих кнопок */
+    /* // (бит 0 = PWR, бит 1 = Volume Down) */
+    /* pmic_arb_write(0, 0x811, 1, (u8[]){ 0x00 }); */
+    /* // 2. Настраиваем полярность: например, 0x03 для сработки при отпускании */
+    /* // или 0x00 при нажатии (так как active low) */
+    /* pmic_arb_write(0, 0x812, 1, (u8[]){ 0x03 }); */
+    /* // 3. Сбрасываем старые зависшие прерывания (пишем 1 в сбрасываемые биты) */
+    /* pmic_arb_write(0, 0x815, 1, (u8[]){ 0x03 }); */
+    /* // 4. Включаем прерывания для PWR и Volume Down (бит 0 и бит 1) */
+    /* pmic_arb_write(0, 0x813, 1, (u8[]){ 0x03 }); */
+    /* writeu32(PMIC_ARB_IRQ_ENABLE(0x2f), 1); */
+
+    pmic_arb_write(0, 0x811, 1, (u8[]){ 0x1 });
+    pmic_arb_write(0, 0x812, 1, (u8[]){ 0x1 });
+    pmic_arb_write(0, 0x813, 1, (u8[]){ 0x1 });
+    pmic_arb_write(0, 0x815, 1, (u8[]){ 0x1 });
+    writeu32(PMIC_ARB_IRQ_ENABLE(0x2f), 1);
+    /* writeu32(PMIC_ARB_IRQ_CLEAR(0x2f), 1); */
+
+    asm volatile("msr daifclr, #15" ::: "memory");
 
     fb_put_char('\n');
 
+    start_timer(1000);
 
-    while (1) {
-        u32 status = 0;
-        pmic_arb_read(0, 0x810, 1, (u8*)&status);
+    while (1) { asm volatile("wfi"); }
 
-        tlmm_set_mode(93, status & 2 ? GPIO_HIGH : GPIO_LOW); // & 1 for power key
-        for (volatile u32 j = 0; j < 10000; j++);
-    }
+    /* while (1) { */
+    /*     u32 status = 0; */
+    /*     pmic_arb_read(0, 0x810, 1, (u8*)&status); */
 
-    edl_reboot();
+    /*     tlmm_set_mode(93, status & 2 ? GPIO_HIGH : GPIO_LOW); // & 1 for power key */
+    /*     for (volatile u32 j = 0; j < 10000; j++); */
+    /* } */
 }

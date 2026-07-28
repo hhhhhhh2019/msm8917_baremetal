@@ -20,14 +20,23 @@
 #define PMIC_ARB_CHNLn_WDATA(n, x)        (PMIC_ARB_CHNLn(n) + 0x10 + (x) * 4)
 #define PMIC_ARB_CHNLn_RDATA(n, x)        (PMIC_ARB_CHNLn(n) + 0x18 + (x) * 4)
 
-#define SPMI_IRQ 0xbe
+#define PMIC_ARB_IRQ(n)        (SPMI_INTR + 0x1000 * (n))
+#define PMIC_ARB_IRQ_ENABLE(n) (PMIC_ARB_IRQ(n) + 0x0)
+#define PMIC_ARB_IRQ_STATUS(n) (PMIC_ARB_IRQ(n) + 0x4)
+#define PMIC_ARB_IRQ_CLEAR(n)  (PMIC_ARB_IRQ(n) + 0x8)
 
-/* #define PMIC_ARB_CMD_OPCODE_SHIFT            27 */
-/* #define PMIC_ARB_CMD_PRIORITY_SHIFT          26 */
-/* /\* #define PMIC_ARB_CMD_SLAVE_ID_SHIFT          20 *\/ */
-/* /\* #define PMIC_ARB_CMD_ADDR_SHIFT              12 *\/ */
-/* #define PMIC_ARB_CMD_ADDR_OFFSET_SHIFT       4 */
-/* #define PMIC_ARB_CMD_BYTE_CNT_SHIFT          0 */
+/* #define PMIC_ARB_IRQ_ENABLE(n) (SPMI_INTR + 4 * (n) + 0x200) */
+/* #define PMIC_ARB_IRQ_STATUS(n) (SPMI_INTR + 4 * (n) + 0x600) */
+/* #define PMIC_ARB_IRQ_CLEAR(n)  (SPMI_INTR + 4 * (n) + 0xa00) */
+
+#define SPMI_IRQ (0xbe + 32)
+
+#define PMIC_ARB_CMD_OPCODE_SHIFT            27
+#define PMIC_ARB_CMD_PRIORITY_SHIFT          26
+/* #define PMIC_ARB_CMD_SLAVE_ID_SHIFT          20 */
+/* #define PMIC_ARB_CMD_ADDR_SHIFT              12 */
+#define PMIC_ARB_CMD_ADDR_OFFSET_SHIFT       4
+#define PMIC_ARB_CMD_BYTE_CNT_SHIFT          0
 
 enum pmic_arb_cmd_op_code {
     PMIC_ARB_OP_EXT_WRITEL = 0,
@@ -55,6 +64,7 @@ enum pmic_arb_chnl_status {
 
 void pmic_arb_init();
 i32 pmic_arb_read(u8 sid, u16 addr, u8 len, u8* data);
+i32 pmic_arb_write(u8 sid, u16 addr, u8 len, u8* data);
 
 
 
@@ -72,13 +82,6 @@ i32 pmic_arb_read(u8 sid, u16 addr, u8 len, u8* data);
 #define PMIC_ARB_WDATA1 0x14
 #define PMIC_ARB_RDATA0 0x18
 #define PMIC_ARB_RDATA1 0x1C
-
-#define PMIC_ARB_CMD_OPCODE_SHIFT      27
-#define PMIC_ARB_CMD_PRIORITY_SHIFT    26
-#define PMIC_ARB_CMD_SLAVE_ID_SHIFT    20
-#define PMIC_ARB_CMD_ADDR_SHIFT        12
-#define PMIC_ARB_CMD_ADDR_OFFSET_SHIFT 4
-#define PMIC_ARB_CMD_BYTE_CNT_SHIFT    0
 
 #define PMIC_ARB_OP_EXT_WRITEL   0
 #define PMIC_ARB_OP_EXT_READL    1
