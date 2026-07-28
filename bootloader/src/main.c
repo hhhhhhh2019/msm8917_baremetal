@@ -75,6 +75,9 @@ void main() {
     fb_init();
     fb_init_addres((void*)0x90001000);
 
+    tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_OUTPUT);
+    tlmm_set_mode(93, GPIO_LOW);
+
     pmic_arb_init();
 
     u32 status = 0;
@@ -84,11 +87,11 @@ void main() {
     fb_put_char('\n');
 
 
-    for (volatile u32 i = 0; i < 1000; i++) {
+    while (1) {
         u32 status = 0;
         pmic_arb_read(0, 0x810, 1, (u8*)&status);
-        fb_put_hex(status, 9);
-        /* fb_put_char((status & 3) + '0'); */
+
+        tlmm_set_mode(93, status & 2 ? GPIO_HIGH : GPIO_LOW); // & 1 for power key
         for (volatile u32 j = 0; j < 10000; j++);
     }
 
