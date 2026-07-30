@@ -2,37 +2,6 @@
 #include "utils.h"
 #include "fb.h"
 
-void fb_put_hex(u64 num, u32 chars) {
-    i32 offset = 0;
-
-    if (chars == 0) {
-        offset = 60;
-
-        while (((num >> offset) & 0xf) == 0 && offset > 0) {
-            offset -= 4;
-        }
-    } else {
-        offset = chars * 4 - 4;
-
-        while (((num >> offset) & 0xf) == 0 && offset > 0) {
-            fb_put_char(' ');
-            offset -= 4;
-        }
-    }
-
-    while (offset >= 0) {
-        u8 oct = (num >> offset) & 0xf;
-
-        if (oct >= 10) {
-            fb_put_char(oct - 10 + 'a');
-        } else {
-            fb_put_char(oct + '0');
-        }
-
-        offset -= 4;
-    }
-}
-
 static i16 channels[1 << 12]; // 8 + 4 бит
 
 void pmic_arb_init() {

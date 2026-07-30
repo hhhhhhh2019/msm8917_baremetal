@@ -12,5 +12,6 @@ void fb_draw_char(u32 x, u32 y, u8 ch);
 void fb_put_char(u8 ch);
 void fb_put_str(char* str);
 void fb_flush();
+void fb_put_hex(u64 num, u32 chars);
 
 #endif // FB_H_
