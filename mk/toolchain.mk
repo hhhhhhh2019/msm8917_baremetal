@@ -24,4 +24,5 @@ menuconfig:
 
 $(KCONFIG_AUTOHEADER): $(KCONFIG_CONFIG)
 	@mkdir -p $(dir $@)
+	@mkdir -p $(KCONFIG_DEPS)/config
 	genconfig --header-path $@ --sync-deps $(KCONFIG_DEPS)/config

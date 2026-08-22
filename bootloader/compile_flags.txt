@@ -1,5 +1,9 @@
 -mgeneral-regs-only
 -ffreestanding
 -nostdlib
--I ./include
--include ./build/generated/config.h
+-I
+./include
+-I
+./build/generated/include
+-include
+./build/generated/config.h

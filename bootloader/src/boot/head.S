@@ -33,7 +33,7 @@ start:
 
 bss_clear:
     cmp x0, x1
-    b.eq run_main
+    b.hs run_main
 
     str xzr, [x0], #8
     b bss_clear

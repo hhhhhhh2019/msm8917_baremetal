@@ -1,6 +1,8 @@
 ENTRY(_start)
 
 SECTIONS {
+    . = 0x80000000;
+
     .text : {
         * (.text.head)
         * (.text)
@@ -16,14 +18,16 @@ SECTIONS {
 
     __data_end = .;
 
-    __bss_start = ALIGN(16);
+    . = ALIGN(16);
+    __bss_start = .;
     .bss : {
         * (.bss)
         * (COMMON)
     }
+    . = ALIGN(16);
     __bss_end = .;
 
     . = ALIGN(16);
-    . = . + 0x1000;
+    . = . + 0x4000;
     __stack_top = .;
 }
