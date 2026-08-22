@@ -1,0 +1,5 @@
+menu BOOT
+  config ENABLE_MMU
+    bool "enable MMU"
+    default y
+endmenu # BOOT

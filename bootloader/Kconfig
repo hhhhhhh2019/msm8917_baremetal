@@ -1,0 +1,3 @@
+mainmenu "Bootloader"
+
+rsource "src/Kconfig"
