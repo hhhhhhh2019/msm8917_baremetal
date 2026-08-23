@@ -9,6 +9,9 @@ MKBOOTIMG := mkbootimg
 
 GZIP := gzip
 SED := sed
+GREP := grep
+AWK := awk
+TR := rt
 
 CC_FLAGS += -MMD -MP -I./include
 LD_FLAGS +=
@@ -24,5 +27,5 @@ menuconfig:
 
 $(KCONFIG_AUTOHEADER): $(KCONFIG_CONFIG)
 	@mkdir -p $(dir $@)
-	@mkdir -p $(KCONFIG_DEPS)/config
-	genconfig --header-path $@ --sync-deps $(KCONFIG_DEPS)/config
+	@mkdir -p $(KCONFIG_DEPS)
+	genconfig --header-path $@ --sync-deps $(KCONFIG_DEPS)
