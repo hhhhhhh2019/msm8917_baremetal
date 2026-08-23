@@ -18,13 +18,13 @@ SECTIONS {
 
     __data_end = .;
 
-    . = ALIGN(16);
+    . = ALIGN(8);
     __bss_start = .;
     .bss : {
         * (.bss)
         * (COMMON)
     }
-    . = ALIGN(16);
+    . = ALIGN(8);
     __bss_end = .;
 
     . = ALIGN(16);
