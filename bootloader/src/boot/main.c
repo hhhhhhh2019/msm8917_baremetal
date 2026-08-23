@@ -1,4 +1,5 @@
-#include "config/mmu.h"
+#include "graphics/fb.h"
+#include "graphics/log.h"
 #include "utils.h"
 
 #ifdef CONFIG_MMU
@@ -18,13 +19,24 @@ u64 tlb_kernel_table[8192] __attribute__((aligned(65536)));
 #endif
 
 void main() {
+    // раскомментировать, если текст не выводится
+    caret_move(0, 0);
+
+    fb_draw_at((void*)0x90001000ULL);
+
+    printf("%6x %06x\n", 123, 321);
+
 #ifdef CONFIG_MMU
+    puts("mmu: start\n");
+
     u8 attr0 =
         (0b0000 << 0) | (0b0000 << 4); // Device memory | Device-nGnRnE memory
     u8 attr1 = (0b1111 << 0)
              | (0b1111 << 4); // Normal Memory, Outer Write-back Non-transient |
                               // Normal Memory, Inner Write-back Non-transient
     asm volatile("msr MAIR_EL1, %0" ::"r"(attr0 | (attr1 << 8)));
+
+    puts("mmu: mair\n");
 
     tlb_kernel_table[0] = 0x00000000 | MMIO_FLAGS;
     tlb_kernel_table[1] = 0x20000000 | MMIO_FLAGS;
@@ -36,8 +48,12 @@ void main() {
     tlb_kernel_table[6] = 0xc0000000 | RAM_FLAGS;
     tlb_kernel_table[7] = 0xe0000000 | RAM_FLAGS;
 
+    puts("mmu: table\n");
+
     asm volatile("msr TTBR0_EL1, %0" ::"r"(tlb_kernel_table));
     asm volatile("msr TTBR1_EL1, %0" ::"r"(tlb_kernel_table));
+
+    puts("mmu: ttbr\n");
 
     u64 tcr = (24ULL << 0) |     // T0SZ
               (0b01ULL << 8) |   // Inner Write-Back Write-Allocate Cacheable
@@ -53,6 +69,8 @@ void main() {
               (1ULL << 36);      // 16bit ASID
 
     asm volatile("msr TCR_EL1, %0" ::"r"(tcr));
+
+    puts("mmu: tcr\n");
 
     asm volatile("ic ialluis     \n"
                  "dsb sy         \n"
@@ -80,7 +98,14 @@ void main() {
                  "tlbi vmalle1is \n"
                  "dsb sy         \n"
                  "isb            \n");
+
+    puts("mmu: enabled\n");
 #endif
+
+    puts("Hello, world!\n");
+    puts("Hello, world!\r");
+    puts("A");
+    fb_flush();
 
     while (1) {
         asm volatile("wfe");

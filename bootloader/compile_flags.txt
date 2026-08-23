@@ -1,3 +1,4 @@
+-std=gnu23
 -mgeneral-regs-only
 -ffreestanding
 -nostdlib
