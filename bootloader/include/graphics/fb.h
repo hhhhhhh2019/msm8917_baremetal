@@ -9,7 +9,7 @@ typedef struct __attribute__((packed)) {
 
 extern const u32 fb_width, fb_height;
 
-void fb_draw_at(void *address);
+void fb_draw_at(void* address);
 void fb_pixel_set(u32 x, u32 y, color_t);
 color_t fb_pixel_get(u32 x, u32 y);
 // void fb_blit_image(

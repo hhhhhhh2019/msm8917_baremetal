@@ -13,4 +13,6 @@ typedef u64 size_t;
 
 #define NULL 0
 
+#define bits(n, e, s) (((n) >> (s)) & (1 << ((e) - (s) + 1)) - 1)
+
 #endif // UTILS_H_

@@ -41,6 +41,7 @@ bss_clear:
 run_main:
     bl main
 
+.global hang
 hang:
     wfe
     b hang

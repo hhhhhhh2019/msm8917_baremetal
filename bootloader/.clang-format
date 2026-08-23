@@ -1,12 +1,9 @@
----
-IndentWidth: 4
-
----
 Language: C
 
 AlignAfterOpenBracket: true
 AlignArrayOfStructures: Right
-AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveAssignments:
+    Enabled: true
 AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveMacros: Consecutive
 AlignConsecutiveShortCaseStatements:

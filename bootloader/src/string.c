@@ -14,7 +14,7 @@ bool is_digit(char ch) {
 
 i32 atoi(const char* s, const char** end_ptr) {
     i32 result = 0;
-    i32 sign = 1;
+    i32 sign   = 1;
 
     if (*s == '-') {
         sign = -1;
@@ -34,7 +34,7 @@ i32 atoi(const char* s, const char** end_ptr) {
 
 i64 atol(const char* s, const char** end_ptr) {
     i64 result = 0;
-    i64 sign = 1;
+    i64 sign   = 1;
 
     if (*s == '-') {
         sign = -1;
