@@ -1,5 +1,4 @@
 #include "graphics/fb.h"
-#include "utils.h"
 
 const u32 fb_width  = CONFIG_FRAMEBUFFER_WIDTH,
           fb_height = CONFIG_FRAMEBUFFER_HEIGHT;

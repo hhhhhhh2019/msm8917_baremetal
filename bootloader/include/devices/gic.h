@@ -1,8 +1,6 @@
 #ifndef _GIC_H
 #define _GIC_H
 
-#include "utils.h"
-
 // https://developer.arm.com/documentation/ihi0048/latest/
 
 #define GICD_BASE 0xb000000ULL

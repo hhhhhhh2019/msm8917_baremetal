@@ -1,9 +1,9 @@
+#include "boot/mmu.h"
 #include "devices/gic.h"
 #include "devices/qtimer.h"
 #include "graphics/fb.h"
 #include "graphics/log.h"
 #include "interrupts/interrupts.h"
-#include "utils.h"
 
 #ifdef CONFIG_MMU
     #define MMIO_FLAGS (0b01 << 0) | (1 << 10) | (0 << 2)

@@ -1,8 +1,6 @@
 #ifndef QTIMER_H_
 #define QTIMER_H_
 
-#include "utils.h"
-
 #define QTIMER_FREQ 0x124f800
 
 #define QTMR_BASE 0xb021000ULL

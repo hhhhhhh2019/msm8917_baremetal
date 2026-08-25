@@ -1,8 +1,6 @@
 #ifndef INTERRUPTS_H_
 #define INTERRUPTS_H_
 
-#include "utils.h"
-
 extern u64 vector_table;
 
 struct registers {

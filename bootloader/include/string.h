@@ -1,8 +1,6 @@
 #ifndef STRING_H_
 #define STRING_H_
 
-#include "utils.h"
-
 size_t strlen(const char*);
 
 bool is_digit(char);

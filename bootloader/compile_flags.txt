@@ -8,3 +8,5 @@
 ./build/generated/include
 -include
 ./build/generated/config.h
+-include
+./include/stdint.h

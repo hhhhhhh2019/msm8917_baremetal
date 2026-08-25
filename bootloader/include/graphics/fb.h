@@ -1,8 +1,6 @@
 #ifndef FB_H_
 #define FB_H_
 
-#include "utils.h"
-
 typedef struct __attribute__((packed)) {
     u8 b, g, r;
 } color_t;
