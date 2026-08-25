@@ -7,7 +7,7 @@ _start:
     nop
 
     // text offset
-    .quad 0x80000000
+    .quad 0x80080000
 
     // image size
     .quad __data_end - _start

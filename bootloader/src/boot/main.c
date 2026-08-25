@@ -1,4 +1,5 @@
 #include "devices/gic.h"
+#include "devices/qtimer.h"
 #include "graphics/fb.h"
 #include "graphics/log.h"
 #include "interrupts/interrupts.h"
@@ -19,6 +20,11 @@
 
 u64 tlb_kernel_table[8192] __attribute__((aligned(65536)));
 #endif
+
+void timer_handler(u32 irq, struct registers*) {
+    putc('t');
+    start_timer(1000);
+}
 
 void main() {
     // раскомментировать, если текст не выводится
@@ -82,6 +88,7 @@ void main() {
     scr |= (1 << 0) | // mmu
            (1 << 2) | // data cache
            (1 << 12); // instruction cache
+    scr &= ~((1 << 2) | (1 << 12));
     asm volatile("msr SCTLR_EL1, %0" ::"r"(scr));
 
     asm volatile("ic ialluis     \n"
@@ -102,6 +109,11 @@ void main() {
      */
     asm volatile("msr daifclr, #15" ::
                      : "memory");
+
+    gic_unmask_interrupt(QTIMER_IRQ);
+    set_irq_handler(QTIMER_IRQ, timer_handler);
+
+    start_timer(1000);
 
     while (1) {
         asm volatile("wfe");

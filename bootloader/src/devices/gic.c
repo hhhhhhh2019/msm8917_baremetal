@@ -23,6 +23,9 @@ void gic_init() {
     }
 
     *GICD_CTLR = 1;
+
+    *GICC_CTLR = 1;
+    *GICC_PMR  = 0xFF;
 }
 
 void gic_unmask_interrupt(u32 vector) {

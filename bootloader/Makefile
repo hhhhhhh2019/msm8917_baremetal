@@ -7,7 +7,7 @@ $(build)/boot.img: $(build)/bootloader-dtb
 		--kernel $< \
 		--ramdisk ramdisk.img \
 		--base 0x80000000 \
-		--kernel_offset 0
+		--kernel_offset 0x80000
 
 include ../mk/toolchain.mk
 include ../mk/rules.mk
@@ -18,7 +18,7 @@ include $(src)/Makefile
 
 DEP := $(OBJ:%.o=%.d)
 
-CC_FLAGS += -mgeneral-regs-only -ffreestanding -mstrict-align -mcpu=cortex-a53 -march=armv8-a
+CC_FLAGS += -mgeneral-regs-only -ffreestanding -mstrict-align -mcpu=cortex-a53 -march=armv8-a -O2
 LD_FLAGS += -nostdlib -gc-sections
 
 .PHONY: $(build)/boot.img menuconfig clean
