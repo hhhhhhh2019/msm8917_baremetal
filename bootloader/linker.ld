@@ -5,15 +5,15 @@ SECTIONS {
 
     .text : {
         * (.text.head)
-        * (.text)
+        * (.text*)
     }
 
     .data : {
-        * (.data)
+        * (.data*)
     }
 
     .rodata : {
-        * (.rodata)
+        * (.rodata*)
     }
 
     __data_end = .;
@@ -21,7 +21,7 @@ SECTIONS {
     . = ALIGN(8);
     __bss_start = .;
     .bss : {
-        * (.bss)
+        * (.bss*)
         * (COMMON)
     }
     . = ALIGN(8);

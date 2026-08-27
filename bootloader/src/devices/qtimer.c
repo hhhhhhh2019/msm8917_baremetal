@@ -20,10 +20,8 @@ void qtimer_disable() {
 
 void start_timer(u64 ms) {
     qtimer_disable();
-    asm volatile("dsb sy" ::
-                     : "memory");
-    *QTMR_V1_CNTP_TVAL = QTIMER_FREQ;
-    asm volatile("dsb sy" ::
-                     : "memory");
+    asm volatile("dsb sy" ::: "memory");
+    *QTMR_V1_CNTP_TVAL = QTIMER_FREQ * ms / 1000;
+    asm volatile("dsb sy" ::: "memory");
     qtimer_enable();
 }

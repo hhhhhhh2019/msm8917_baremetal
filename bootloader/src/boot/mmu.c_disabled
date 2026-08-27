@@ -1,0 +1,84 @@
+#include "boot/mmu.h"
+#include "graphics/fb.h"
+#include "graphics/log.h"
+
+/*
+ размер страницы 4КБ -> 12 бит на смещение
+ размер таблицы = размеру страницы -> 4096 / 8 = 512 элементов -> 9 бит на
+ таблицу
+ -> размер ВА = 12 + 9 * 3 = 39
+ -> T0SZ = 64 - 39 = 25
+ то есть 3 уровня таблиц
+ где 1 запись в
+ level0 - маппит 4КБ
+ level1 - маппит 4КБ*512=2МБ
+ level2 - маппит 2МБ*512=1ГБ
+ */
+typedef u64 tlb_table[512] __attribute__((aligned(4096)));
+tlb_table tt[10];
+
+
+void mmu_init() {
+    puts("mmu: start\n");
+
+    u64 mair = 0x44ff00;
+    asm volatile("MSR MAIR_EL1, %0" ::"r"(mair));
+
+    puts("mmu: mair configured\n");
+
+    tt[0][0] = 0x00000000 | TLB_BLOCK | TLB_ACCESS(1) | TLB_ATTR(0);
+    tt[0][1] = 0x40000000 | TLB_BLOCK | TLB_ACCESS(1) | TLB_ATTR(0);
+    tt[0][2] = 0x80000000 | TLB_BLOCK | TLB_ACCESS(1) | TLB_ATTR(1);
+    tt[0][3] = 0xc0000000 | TLB_BLOCK | TLB_ACCESS(1) | TLB_ATTR(1);
+
+    puts("mmu: tables initizalied\n");
+
+    asm volatile("MSR TTBR0_EL1, %0" ::"r"(tt));
+    puts("mmu: ttbr initizalied\n");
+
+    u64 tcr = TCR_T0SZ(25) | TCR_INNER0_BACK_ALLOC | TCR_OUTER0_BACK_ALLOC
+            | TCR_OUTER_SHARE0 | TCR_GRANULE0_4KB | TCR_IPS_32bits
+            | TCR_ASID_16bit | TCR_ASID0 | TCR_T1SZ(25);
+    asm volatile("MSR TCR_EL1, %0" ::"r"(tcr));
+
+    puts("mmu: tcr configured\n");
+
+    register u64 sctlr;
+    asm volatile("MRS %0, SCTLR_EL1" : "=r"(sctlr));
+    sctlr |= SCTLR_MMU_ENABLE | SCTLR_DCACHE | SCTLR_ICACHE;
+
+    asm volatile("isb\n"
+                 "dsb sy\n"
+                 "TLBI VMALLE1\n"
+                 "IC IALLU\n"
+                 "isb\n"
+                 "dsb sy");
+
+    asm volatile("MSR SCTLR_EL1, %0" ::"r"(sctlr));
+
+    asm volatile("isb\n"
+                 "dsb sy\n"
+                 "TLBI VMALLE1\n"
+                 "IC IALLU\n"
+                 "isb\n"
+                 "dsb sy");
+
+
+    puts("mmu: sctlr configured\n");
+    fb_flush();
+
+    u64 freq, start, now;
+    asm volatile("mrs %0, cntfrq_el0" : "=r"(freq));
+    asm volatile("mrs %0, cntpct_el0" : "=r"(start));
+    printf("waiting...\n");
+    fb_flush();
+
+    do {
+        asm volatile("mrs %0, cntpct_el0" : "=r"(now));
+    } while (now - start < freq * 17); // ждём ~5 секунд
+
+    printf("survived 5s wait\n");
+    fb_flush();
+
+    asm volatile("isb" ::: "memory");
+}

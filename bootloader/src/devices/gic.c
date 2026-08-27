@@ -1,4 +1,5 @@
 #include "devices/gic.h"
+#include "utils.h"
 
 void gic_init() {
     *GICD_CTLR = 0;

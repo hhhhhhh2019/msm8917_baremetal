@@ -31,7 +31,7 @@ BraceWrapping:
     BeforeElse: false
     BeforeWhile: false
 BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeInlineASMColon: Always
+BreakBeforeInlineASMColon: OnlyMultiline
 IndentCaseBlocks: true
 IndentCaseLabels: false
 IndentGotoLabels: false
