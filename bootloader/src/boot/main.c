@@ -3,8 +3,8 @@
 #include "devices/gpio.h"
 #include "devices/qtimer.h"
 #include "graphics/fb.h"
-#include "graphics/log.h"
 #include "interrupts/interrupts.h"
+#include "log.h"
 
 void timer_handler(u32 irq, struct registers*) {
     start_timer(10);

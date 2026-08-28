@@ -1,4 +1,4 @@
-#include "graphics/log.h"
+#include "log.h"
 #include "graphics/charset.h"
 #include "graphics/fb.h"
 #include "string.h"

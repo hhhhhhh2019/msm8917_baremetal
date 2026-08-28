@@ -1,7 +1,7 @@
 #include "interrupts/interrupts.h"
 #include "devices/gic.h"
 #include "graphics/fb.h"
-#include "graphics/log.h"
+#include "log.h"
 
 static irq_handler irq_handlers[512] = {0};
 
