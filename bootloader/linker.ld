@@ -4,28 +4,30 @@ SECTIONS {
     . = 0x80080000;
 
     .text : {
-        *(.text.head)
-        *(.text*)
-    }
-
-    .rodata : {
-        *(.rodata)
+        * (.text.head)
+        * (.text*)
     }
 
     .data : {
-        *(.data)
+        * (.data*)
+    }
+
+    .rodata : {
+        * (.rodata*)
     }
 
     __data_end = .;
 
-    .bss : ALIGN(16) {
-        _bss_start = .;
-        *(.bss)
-        . = ALIGN(16);
-        _bss_end = .;
+    . = ALIGN(8);
+    __bss_start = .;
+    .bss : {
+        * (.bss*)
+        * (COMMON)
     }
+    . = ALIGN(8);
+    __bss_end = .;
 
     . = ALIGN(16);
-    . = . + 0x1000;
-    _stack_top = .;
+    . = . + 0x4000;
+    __stack_top = .;
 }

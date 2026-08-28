@@ -1,0 +1,13 @@
+menuconfig FRAMEBUFFER
+    bool "Framebuffer support"
+    default y
+
+if FRAMEBUFFER
+    config FRAMEBUFFER_WIDTH
+        int "framebuffer width"
+        default 720
+
+    config FRAMEBUFFER_HEIGHT
+        int "framebuffer HEIGHT"
+        default 1280
+endif # FRAMEBUFFER

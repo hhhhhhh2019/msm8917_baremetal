@@ -1,47 +1,41 @@
-include ../Makefile.defaults
+build ?= build
+src ?= src
 
-BUILD?=build
-SRC=$(shell find ./src -type f -name '*.c' -o -name '*.S')
-OBJ:=$(SRC:.c=.o)
-OBJ:=$(OBJ:.S=.o)
-OBJ:=$(patsubst ./src/%,./$(BUILD)/%,$(OBJ))
-DEP=$(OBJ:.o=.d)
-
-AS_FLAGS+=
-CC_FLAGS+=-MMD -MP -mgeneral-regs-only -ffreestanding -I./include
-LD_FLAGS+=-gc-sections
-
-$(BUILD)/%.o: src/%.S
-	@mkdir -p `dirname $@`
-	$(AS) $(AS_FLAGS) -c $< -o $@
-
-$(BUILD)/%.o: src/%.c
-	@mkdir -p `dirname $@`
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-$(BUILD)/boot.img: $(BUILD)/bootloader-dtb
+$(build)/boot.img: $(build)/bootloader-dtb
 	$(MKBOOTIMG) \
 		--output $@ \
 		--kernel $< \
 		--ramdisk ramdisk.img \
-		--base 0x80080000
+		--base 0x80000000 \
+		--kernel_offset 0x80000
 
-$(BUILD)/bootloader-dtb: $(BUILD)/bootloader.gz
-	# cat $< ~/opt/lk2nd/build-lk2nd-msm8952/lk2nd/device/dts/msm8952/msm8917-xiaomi-common.dtb > $@
-	cat $< ../pmos.dtb > $@
+include ../mk/toolchain.mk
+include ../mk/rules.mk
 
-$(BUILD)/bootloader.gz: $(BUILD)/bootloader
-	gzip -fk $^ > $@
+include $(KCONFIG_CONFIG)
 
-$(BUILD)/bootloader: $(BUILD)/bootloader.elf
+include $(src)/Makefile
+
+DEP := $(OBJ:%.o=%.d)
+
+CC_FLAGS += -mgeneral-regs-only -ffreestanding -mstrict-align -mcpu=cortex-a53 -march=armv8-a -O2 -include ./include/stdint.h
+LD_FLAGS += -nostdlib -gc-sections
+
+.PHONY: $(build)/boot.img menuconfig clean
+
+$(build)/bootloader-dtb: $(build)/bootloader.gz
+	cat $< ./pmos.dtb > $@
+
+$(build)/bootloader.gz: $(build)/bootloader.bin
+	$(GZIP) -9 -c $< > $@
+
+$(build)/bootloader.bin: $(build)/bootloader.elf
 	$(OBJCOPY) -O binary $< $@
 
-$(BUILD)/bootloader.elf: $(OBJ) | $(BUILD)
-	$(LD) $(LD_FLAGS) -T linker.ld -Map=$(BUILD)/bootloader.elf.map $^ -o $@
+$(build)/bootloader.elf: $(OBJ)
+	$(LD) $(LD_FLAGS) -T linker.ld -Map=$(build)/bootloader.elf.map $^ -o $@
 
-run: $(BUILD)/boot.img
-	edl reset && fastboot boot build/boot.img && edl peek 0x90000000 0x1000 dump && cat dump
+clean:
+	rm -rf $(build)
 
 -include $(DEP)
-
-.PHONY: $(BUILD)/boot.img run

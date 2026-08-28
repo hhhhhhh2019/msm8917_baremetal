@@ -1,0 +1,51 @@
+Language: C
+
+AlignAfterOpenBracket: true
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments:
+    Enabled: true
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignConsecutiveShortCaseStatements:
+    Enabled: true
+AlignEscapedNewlines: LeftWithLastLine
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: Always
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BitFieldColonSpacing: Both
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterCaseLabel: false
+    AfterClass: false
+    AfterControlStatement: Never
+    AfterEnum: false
+    AfterFunction: false
+    AfterStruct: false
+    AfterUnion: false
+    AfterExternBlock: false
+    BeforeElse: false
+    BeforeWhile: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeInlineASMColon: OnlyMultiline
+IndentCaseBlocks: true
+IndentCaseLabels: false
+IndentGotoLabels: false
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
+ContinuationIndentWidth: 4
+IndentWrappedFunctionNames: true
+IntegerLiteralSeparator:
+    Binary: 0
+    Decimal: 3
+    Hex: -1
+PointerAlignment: Left
+ReferenceAlignment: Right
+SortIncludes:
+    Enabled: true
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false

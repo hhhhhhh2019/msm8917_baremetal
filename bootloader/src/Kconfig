@@ -1,0 +1,2 @@
+source "./src/boot/Kconfig"
+source "./src/graphics/Kconfig"

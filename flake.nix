@@ -2,51 +2,48 @@
   description = "A very basic flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable"; # for some reason stable version 25.11 doesn't have cache for gcc
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, flake-utils }:
-  flake-utils.lib.eachDefaultSystem (
-    system: let
-      pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
+  flake-utils.lib.eachDefaultSystem(system: let
+    pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
 
-      bootloader = pkgs.stdenv.mkDerivation {
-        pname = "bootloader";
-        version = "0.1.0";
+    cc = pkgs.pkgsCross.aarch64-embedded.buildPackages.gcc;
+    binutils = pkgs.pkgsCross.aarch64-embedded.buildPackages.binutils;
+    python = pkgs.python3.withPackages (ps: [
+      ps.kconfiglib
+    ]);
 
-        src = pkgs.lib.fileset.toSource { root = ./.; fileset = pkgs.lib.fileset.unions [ ./bootloader ./Makefile.defaults ./pmos.dtb ]; };
+    bootloader = pkgs.stdenv.mkDerivation {
+      name = "bootloader";
+      version = "0.0.1";
 
-        nativeBuildInputs = with pkgs; [
-          gnumake
-          pkgsCross.aarch64-embedded.buildPackages.gcc
-          pkgsCross.aarch64-embedded.buildPackages.binutils
-          dtc
-          android-tools
-        ];
+      buildInputs = with pkgs; [
+        cc
+        binutils
+        gnumake
+        gzip
+        python
+      ];
 
-        buildPhase = ''
-          cd bootloader
-          make
-        '';
+      nativeBuildInputs = with pkgs; [
+        android-tools
+        edl
+      ];
+    };
+  in {
+    packages = {};
 
-        installPhase = ''
-          mkdir -p $out
-          cp build/boot.img $out/
-          cp build/bootloader.elf.map $out/
-        '';
-      };
-    in {
-      packages = {
-        inherit bootloader;
-      };
-
-      devShell = pkgs.mkShell {
+    devShells = {
+      bootloader = pkgs.mkShell {
         inputsFrom = [ bootloader ];
+
         packages = with pkgs; [
-          edl
           clang-tools
         ];
       };
-    });
-  }
+    };
+  });
+}

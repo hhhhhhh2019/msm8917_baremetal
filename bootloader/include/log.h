@@ -1,15 +1,12 @@
 #ifndef LOG_H_
 #define LOG_H_
 
-enum LogLevel {
-    LOG_INFO,
-    LOG_WARNING,
-    LOG_ERROR,
-    LOG_PANIC,
-};
+extern u32 caret_x, caret_y;
 
-void clear_debug_buffer();
-void log(enum LogLevel, char*);
-void logf(enum LogLevel, char* fmt, ...);
+void caret_move(u32 x, u32 y);
+void putc(char);
+void puts(const char*);
+void putsn(const char* s, size_t n);
+void printf(const char* format, ...);
 
 #endif // LOG_H_

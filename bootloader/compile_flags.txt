@@ -1,5 +1,12 @@
---target=aarch64
+-std=gnu23
+-mgeneral-regs-only
 -ffreestanding
+-nostdlib
 -I
 ./include
--std=gnu23
+-I
+./build/generated/include
+-include
+./build/generated/config.h
+-include
+./include/stdint.h
