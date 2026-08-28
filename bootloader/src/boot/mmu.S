@@ -73,6 +73,8 @@ mmu_init:
 
     nop
     nop
+    nop
+    nop
 
     ldr x0, =msg_sctlr
     bl printf

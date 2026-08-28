@@ -19,7 +19,7 @@ void putc(char ch) {
         break;
     default:
         {
-            #ifdef CONFIG_FRAMEBUFFER
+#ifdef CONFIG_FRAMEBUFFER
             u32 X = caret_x * char_width;
             u32 Y = caret_y * char_height;
 
@@ -31,7 +31,7 @@ void putc(char ch) {
                     fb_pixel_set(X + x, Y + y, (color_t){c, c, c});
                 }
             }
-            #endif
+#endif
 
             caret_x++;
 

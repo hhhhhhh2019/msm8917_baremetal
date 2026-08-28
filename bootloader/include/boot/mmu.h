@@ -53,9 +53,9 @@
 #define TCR_ASID_8bit  (0ULL << 36)
 #define TCR_ASID_16bit (1ULL << 36)
 
-#define TLB_TABLE 0b11ULL
-#define TLB_BLOCK 0b01ULL
-#define TLB_ATTR(n) (n << 2)
+#define TLB_TABLE        0b11ULL
+#define TLB_BLOCK        0b01ULL
+#define TLB_ATTR(n)      (n << 2)
 #define TLB_ACCESS(bool) (bool << 10)
 
 void mmu_init();

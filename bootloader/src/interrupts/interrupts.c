@@ -22,7 +22,7 @@ void int_irq_handler(struct registers* regs) {
     /* asm volatile("nop"); */
 
     if (irq_handlers[irq] != 0) {
-        asm volatile(".balign 64; nop" ::: "memory");
+        /* asm volatile(".balign 64; nop" ::: "memory"); */
         irq_handlers[irq](irq, regs);
     } else {
         printf("\nno handler for irq %d\n", irq);

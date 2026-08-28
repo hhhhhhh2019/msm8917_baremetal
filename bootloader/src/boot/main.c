@@ -1,14 +1,23 @@
 #include "boot/mmu.h"
 #include "devices/gic.h"
+#include "devices/gpio.h"
 #include "devices/qtimer.h"
 #include "graphics/fb.h"
 #include "graphics/log.h"
 #include "interrupts/interrupts.h"
 
 void timer_handler(u32 irq, struct registers*) {
-    start_timer(1000);
+    start_timer(10);
     putc('t');
     fb_flush();
+
+    tlmm_set_status(91, 0);
+
+    if (tlmm_get_mode(91) == 1) {
+        tlmm_set_mode(93, GPIO_LOW);
+    } else {
+        tlmm_set_mode(93, GPIO_HIGH);
+    }
 }
 
 void hang();
@@ -59,9 +68,15 @@ void main() {
 #endif
 
     gic_unmask_interrupt(QTIMER_IRQ);
-    set_irq_handler(QTIMER_IRQ, timer_handler);
+    set_irq_handler(QTIMER_IRQ, &timer_handler);
 
-    start_timer(1000);
+    tlmm_cfg(93, GPIO_NO_PULL, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_OUTPUT);
+    tlmm_set_mode(93, GPIO_LOW);
+
+    tlmm_cfg(91, GPIO_PULL_UP, GPIO_FUNC_GPIO, GPIO_2MA, GPIO_INPUT);
+    tlmm_int_cfg(91, true, GPIO_ACTIVE_LOW, GPIO_DETECT_DEDGE, true, 4);
+
+    start_timer(1);
 
     while (1) {
         asm volatile("wfe");
