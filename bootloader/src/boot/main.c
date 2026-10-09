@@ -31,6 +31,13 @@ void main() {
 
     puts("start\n");
 
+    u64 midr;
+    u64 revidr;
+    asm volatile("MRS %0, MIDR_EL1" : "=r"(midr));
+    asm volatile("MRS %0, REVIDR_EL1" : "=r"(revidr));
+    printf("midr: %x\n", midr);
+    printf("revidr: %x\n", revidr);
+
     /* for (u32 level = 0; level < 4; level++) { */
     /*     asm volatile("MSR CSSELR_EL1, %0" :: "r"(level)); */
     /*     u32 ccsidr; */
