@@ -39,9 +39,8 @@ mmu_init:
     isb
 
     mrs x0, sctlr_el1
-    ldr x1, =(1<<2) | (1<<12)
-    orr x0, x0, #1
-    bic x0, x0, x1
+    ldr x1, =(1<<0) | (1<<2) | (1<<12)
+    orr x0, x0, x1
     msr sctlr_el1, x0
     isb 
 

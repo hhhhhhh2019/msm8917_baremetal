@@ -8,8 +8,8 @@
 
 void timer_handler(u32 irq, struct registers*) {
     start_timer(10);
-    putc('t');
-    fb_flush();
+    /* putc('t'); */
+    /* fb_flush(); */
 
     tlmm_set_status(91, 0);
 
@@ -25,7 +25,7 @@ void hang();
 void main() {
     // раскомментировать, если текст не выводится
     // TODO: починить bss либо поянть, почему caret сам не обнуляется
-    caret_move(0, 0);
+    /* caret_move(0, 0); */
 
     fb_draw_at((void*)0x90001000ULL);
 
